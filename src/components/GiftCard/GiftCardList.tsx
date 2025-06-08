@@ -3,6 +3,9 @@ import type { GiftCard, GiftcardPagination } from "./types";
 import GiftcardItem from "./GiftCardItem";
 
 const apiUrl = import.meta.env.VITE_API_URL;
+const fullUrl = `${apiUrl}/giftcards`;
+
+console.log("📡 URL a la que se hace fetch:", fullUrl); // 👈 Esto te muestra la URL final
 
 const GiftcardList = () => {
   const [giftcards, setGiftcards] = useState<GiftCard[]>([]);
