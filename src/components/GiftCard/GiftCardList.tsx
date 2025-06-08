@@ -2,11 +2,14 @@ import { useEffect, useState } from "react";
 import type { GiftCard, GiftcardPagination } from "./types";
 import GiftcardItem from "./GiftCardItem";
 
+const apiUrl = import.meta.env.VITE_API_URL;
+
 const GiftcardList = () => {
   const [giftcards, setGiftcards] = useState<GiftCard[]>([]);
 
   useEffect(() => {
-    fetch(`http://localhost:8000/apis/giftcards`)
+    // fetch(`http://localhost:8000/apis/giftcards`)
+    fetch(`${apiUrl}/giftcards`)
       .then((res) => {
         if (!res.ok) {
           throw new Error(`Error del servidor: ${res.status}`);
