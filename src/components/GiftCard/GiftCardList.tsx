@@ -6,12 +6,22 @@ const GiftcardList = () => {
   const [giftcards, setGiftcards] = useState<GiftCard[]>([]);
 
   useEffect(() => {
-    fetch(`http://localhost:8000/api/giftcards`)
-      .then((res) => res.json())
+    fetch(`http://localhost:8000/apis/giftcards`)
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`Error del servidor: ${res.status}`);
+        }
+        return res.json();
+      })
       .then((data: GiftcardPagination) => {
+        console.log("Datos cargados:", data);
         setGiftcards(data.data);
+      })
+      .catch((error) => {
+        console.error("Error al cargar giftcards:", error);
       });
   }, []);
+  
 
   if (!giftcards.length) return <div>Cargando giftcards...</div>;
 

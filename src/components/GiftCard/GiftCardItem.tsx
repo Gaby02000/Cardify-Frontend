@@ -54,7 +54,7 @@ const GiftcardItem: React.FC<Props> = ({ giftcard }) => {
           }}
         >
           <img
-            src={giftcard.iconUrl || "https://via.placeholder.com/150"}
+            src={giftcard.image || "https://via.placeholder.com/150"}
             alt={giftcard.title}
             style={{
               width: 150,
