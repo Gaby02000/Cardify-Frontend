@@ -1,4 +1,3 @@
-import React from 'react';
 import { GiftcardList } from './components/GiftCard'; // Importando desde index.tsx que exporta GiftcardList
 
 const fadeInApp = `
