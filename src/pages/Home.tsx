@@ -1,9 +1,11 @@
 // src/pages/Home.tsx
 import GiftCardList from "../components/GiftCard/GiftCardList";
+import Navbar from "../components/Navbar/Navbar";
 
 const Home = () => {
   return (
     <div style={{ padding: "var(--spacing-lg)" }}>
+      <Navbar />
       <h1
         style={{
           fontSize: "var(--font-size-title)",
