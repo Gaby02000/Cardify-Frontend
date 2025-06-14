@@ -1,53 +1,34 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+@import './styles/variables.css';
 
-  color-scheme: dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-html, body, #root {
-  height: 100%;
+* {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-body {
-  display: flex;
-  flex-direction: column;
-  min-width: 320px;
-  min-height: 100vh;
-  background-color: #242424;
-  color: rgba(255,255,255,0.87);
-}
-
-h1, h2, h3 {
-  margin: 0;
+html, body, #root {
+  height: 100%;
+  font-family: var(--font-base);
+  background-color: var(--color-bg);
+  color: var(--color-text);
 }
 
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
+  border-radius: var(--radius);
+  border: none;
+  padding: var(--spacing-sm) var(--spacing-md);
   font-size: 1em;
   font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: var(--color-primary);
+  color: var(--color-bg);
   cursor: pointer;
-  transition: border-color 0.25s;
-  color: white;
+  transition: background-color 0.25s;
 }
+
 button:hover {
-  border-color: #646cff;
+  background-color: var(--color-primary-dark);
 }
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+
+h1, h2, h3 {
+  margin-bottom: var(--spacing-sm);
 }

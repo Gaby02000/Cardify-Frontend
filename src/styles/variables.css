@@ -1,0 +1,24 @@
+:root {
+    /* 🎨 Colores */
+    --color-bg: #121212;
+    --color-surface: #1e1e1e;
+    --color-primary: #BB86FC;
+    --color-primary-dark: #3a1e7e;
+    --color-text: rgba(255, 255, 255, 0.87);
+    --color-muted: #aaa;
+  
+    /* 🖋 Tipografía */
+    --font-base: system-ui, Avenir, Helvetica, Arial, sans-serif;
+    --font-size-base: 1rem;
+    --font-size-title: 2.5rem;
+  
+    /* 🎛️ Espaciados */
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 2rem;
+    --spacing-xl: 4rem;
+  
+    /* 🧱 Bordes */
+    --radius: 8px;
+  }
+  

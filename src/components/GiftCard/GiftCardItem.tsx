@@ -12,9 +12,9 @@ const GiftcardItem: React.FC<Props> = ({ giftcard }) => {
     <div
       style={{
         perspective: 1000,
-        width: 250,
+        width: "100%",
+        maxWidth: 250,
         height: 350,
-        margin: 15,
       }}
     >
       <div
@@ -27,26 +27,26 @@ const GiftcardItem: React.FC<Props> = ({ giftcard }) => {
           transition: "transform 0.8s",
           transformStyle: "preserve-3d",
           cursor: "pointer",
-          borderRadius: 16,
+          borderRadius: "var(--radius)",
           boxShadow: "0 4px 15px rgba(154, 93, 232, 0.5)",
           transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
-          backgroundColor: "#1e1e1e",
-          color: "white",
+          backgroundColor: "var(--color-surface)",
+          color: "var(--color-text)",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
-          padding: 20,
+          padding: "var(--spacing-md)",
         }}
       >
-        {/* Front side */}
+        {/* Front */}
         <div
           style={{
             position: "absolute",
             width: "100%",
             height: "100%",
             backfaceVisibility: "hidden",
-            borderRadius: 16,
+            borderRadius: "var(--radius)",
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
@@ -60,29 +60,37 @@ const GiftcardItem: React.FC<Props> = ({ giftcard }) => {
               width: 150,
               height: 150,
               borderRadius: 12,
-              marginBottom: 20,
+              marginBottom: "var(--spacing-md)",
               transition: "transform 0.3s ease",
             }}
           />
           <h2>{giftcard.title}</h2>
-          <p style={{ marginTop: 8, fontSize: 18 }}>Precio: ${giftcard.price}</p>
-          <p style={{ marginTop: 12, fontSize: 14, color: "#aaa" }}>
+          <p style={{ marginTop: "var(--spacing-sm)", fontSize: 18 }}>
+            Precio: ${giftcard.price}
+          </p>
+          <p
+            style={{
+              marginTop: "var(--spacing-md)",
+              fontSize: 14,
+              color: "var(--color-muted)",
+            }}
+          >
             (Click en la tarjeta para ver detalle)
           </p>
         </div>
 
-        {/* Back side */}
+        {/* Back */}
         <div
           style={{
             position: "absolute",
             width: "100%",
             height: "100%",
             backfaceVisibility: "hidden",
-            borderRadius: 16,
-            backgroundColor: "#3a1e7e",
-            color: "#eee",
+            borderRadius: "var(--radius)",
+            backgroundColor: "var(--color-primary-dark)",
+            color: "var(--color-text)",
             transform: "rotateY(180deg)",
-            padding: 20,
+            padding: "var(--spacing-md)",
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
@@ -95,16 +103,16 @@ const GiftcardItem: React.FC<Props> = ({ giftcard }) => {
           <p>{giftcard.description || "Sin descripción disponible."}</p>
           <button
             onClick={(e) => {
-              e.stopPropagation(); // para que no gire al hacer click en el botón
+              e.stopPropagation();
               setFlipped(false);
             }}
             style={{
-              marginTop: 20,
+              marginTop: "var(--spacing-md)",
               padding: "8px 16px",
-              borderRadius: 8,
+              borderRadius: "var(--radius)",
               border: "none",
-              backgroundColor: "#BB86FC",
-              color: "#1e1e1e",
+              backgroundColor: "var(--color-primary)",
+              color: "var(--color-bg)",
               cursor: "pointer",
               fontWeight: "bold",
             }}

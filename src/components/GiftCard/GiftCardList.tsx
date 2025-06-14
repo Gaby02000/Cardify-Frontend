@@ -1,50 +1,25 @@
-import { useEffect, useState } from "react";
-import type { GiftCard, GiftcardPagination } from "./types";
 import GiftcardItem from "./GiftCardItem";
-
-const apiUrl = import.meta.env.VITE_API_URL;
-const fullUrl = `${apiUrl}/giftcards`;
-
-console.log("📡 URL a la que se hace fetch:", fullUrl); // 👈 Esto te muestra la URL final
+import { useGiftcards } from "../../hooks/useGiftcards";
 
 const GiftcardList = () => {
-  const [giftcards, setGiftcards] = useState<GiftCard[]>([]);
 
-  useEffect(() => {
-    // fetch(`http://localhost:8000/apis/giftcards`)
-    fetch(`${apiUrl}/giftcards`)
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error(`Error del servidor: ${res.status}`);
-        }
-        return res.json();
-      })
-      .then((data: GiftcardPagination) => {
-        console.log("Datos cargados:", data);
-        setGiftcards(data.data);
-      })
-      .catch((error) => {
-        console.error("Error al cargar giftcards:", error);
-      });
-  }, []);
-  
+  const { giftcards, loading } = useGiftcards();
 
-  if (!giftcards.length) return <div>Cargando giftcards...</div>;
+  if (loading) return <div>Cargando giftcards...</div>;
 
   return (
     <div
       style={{
-        width: "100vw",
-        height: "100vh",
-        backgroundColor: "#121212",
-        padding: 40,
+        width: "100%",
+        minHeight: "calc(100vh - 80px)",
+        backgroundColor: "var(--color-bg)",
+        padding: "var(--spacing-lg)",
         display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-        gridAutoRows: "1fr",       // filas que se ajustan automáticamente para llenar altura
-        gap: 30,
-        justifyItems: "stretch",   // que las tarjetas ocupen todo el ancho disponible de su celda
-        alignContent: "stretch",   // que el grid llene todo el alto posible
-        overflowY: "auto",         // scroll vertical si hay muchas tarjetas
+        gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+        gap: "var(--spacing-lg)",
+        justifyItems: "center",
+        alignItems: "start",
+        boxSizing: "border-box",
       }}
     >
       {giftcards.map((giftcard) => (
