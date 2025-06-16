@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import type { GiftCard } from "./types";
+import { useCart } from "../../hooks/useCart";
 
 interface Props {
   giftcard: GiftCard;
@@ -7,6 +8,7 @@ interface Props {
 
 const GiftcardItem: React.FC<Props> = ({ giftcard }) => {
   const [flipped, setFlipped] = useState(false);
+  const { addToCart } = useCart();
 
   return (
     <div
@@ -77,6 +79,19 @@ const GiftcardItem: React.FC<Props> = ({ giftcard }) => {
           >
             (Click en la tarjeta para ver detalle)
           </p>
+          <button
+            onClick={() =>
+              addToCart({
+                giftcardId: giftcard.id,
+                title: giftcard.title,
+                price: giftcard.price,
+                quantity: 1,
+                image: giftcard.image,
+              })
+            }
+          >
+            Agregar al carrito
+          </button>
         </div>
 
         {/* Back */}
