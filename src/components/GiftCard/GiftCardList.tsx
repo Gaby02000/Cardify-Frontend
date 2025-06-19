@@ -2,7 +2,6 @@ import GiftcardItem from "./GiftCardItem";
 import { useGiftcards } from "../../hooks/useGiftcards";
 
 const GiftcardList = () => {
-
   const { giftcards, loading } = useGiftcards();
 
   if (loading) return <div>Cargando giftcards...</div>;

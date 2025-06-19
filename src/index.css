@@ -11,6 +11,7 @@ html, body, #root {
   font-family: var(--font-base);
   background-color: var(--color-bg);
   color: var(--color-text);
+  scroll-behavior: smooth;
 }
 
 button {
@@ -22,13 +23,26 @@ button {
   background-color: var(--color-primary);
   color: var(--color-bg);
   cursor: pointer;
-  transition: background-color 0.25s;
+  transition: background-color 0.25s, transform 0.25s, box-shadow 0.25s;
 }
 
 button:hover {
   background-color: var(--color-primary-dark);
+  transform: scale(1.05);
+  box-shadow: 0 0 10px var(--color-primary-light);
 }
 
 h1, h2, h3 {
   margin-bottom: var(--spacing-sm);
+}
+
+/* Animaciones y sombras adicionales */
+.animate-pulse {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
 }

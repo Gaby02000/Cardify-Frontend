@@ -1,5 +1,11 @@
+import { useState } from "react";
+import CartDrawer from "../Cart/CartDrawer";
+
 const Navbar = () => {
-    return (
+  const [cartOpen, setCartOpen] = useState(false);
+
+  return (
+    <>
       <nav
         style={{
           backgroundColor: "var(--color-surface)",
@@ -17,25 +23,48 @@ const Navbar = () => {
             fontSize: "var(--font-size-title)",
           }}
         >
-          Cardify
+          <a href="#hero" style={{ textDecoration: "none", color: "inherit" }}>
+            Cardify
+          </a>
         </h2>
-        <div style={{ display: "flex", gap: "var(--spacing-md)" }}>
+        {/* Navigation Links */}
+        <div style={{ flex: 2, display: "flex", justifyContent: "center" }}>
+          <ul style={{ display: "flex", gap: "2rem", listStyle: "none", margin: 0, padding: 0 }}>
+            <li><a href="#hero" style={link}>Home</a></li>
+            <li><a href="#categories" style={link}>Categorías</a></li>
+            <li><a href="#giftcards" style={link}>GiftCards</a></li>
+            <li><a href="#footer" style={link}>Contacto</a></li>
+          </ul>
+        </div>
+
+        {/* Auth + Cart */}
+        <div style={{ flex: 1, display: "flex", justifyContent: "flex-end", gap: "1rem" }}>
           <button style={btn}>Login</button>
-          <button style={btn}>Mi Carrito 🛒</button>
+          <button style={btn} onClick={() => setCartOpen(true)}>
+            Mi Carrito 🛒
+          </button>
         </div>
       </nav>
-    );
-  };
-  
-  const btn = {
-    padding: "0.5rem 1rem",
-    backgroundColor: "var(--color-primary)",
-    border: "none",
-    borderRadius: "var(--radius)",
-    color: "var(--color-bg)",
-    cursor: "pointer",
-    fontWeight: "bold",
-  };
-  
-  export default Navbar;
-  
+
+      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
+    </>
+  );
+};
+
+const btn = {
+  padding: "0.5rem 1rem",
+  backgroundColor: "var(--color-primary)",
+  border: "none",
+  borderRadius: "var(--radius)",
+  color: "var(--color-bg)",
+  cursor: "pointer",
+  fontWeight: "bold" as const,
+};
+
+const link = {
+  color: "white",
+  textDecoration: "none",
+  fontWeight: "bold",
+};
+
+export default Navbar;
