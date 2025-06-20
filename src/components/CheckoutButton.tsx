@@ -1,12 +1,12 @@
 // src/components/CheckoutButton.tsx
 
-import { useCart } from "../hooks/useCart";
+//import { useCart } from "../hooks/useCart";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const CheckoutButton = () => {
-  const { cartItems, clearCart } = useCart();
+  // const { cartItems, clearCart } = useCart();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
@@ -28,10 +28,10 @@ const CheckoutButton = () => {
       });
 
       if (!res.ok) throw new Error("Error al crear orden");
-      const order = await res.json();
+      //const order = await res.json();
 
       alert("Orden creada exitosamente!");
-      clearCart();
+      //clearCart();
       navigate("/orden-confirmada");
     } catch (err) {
       console.error(err);
