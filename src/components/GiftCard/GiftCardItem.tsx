@@ -61,7 +61,7 @@ const GiftcardItem: React.FC<Props> = ({ giftcard }) => {
                 objectFit: "cover",
               }}
             />
-            {giftcard.originalPrice && (
+            {giftcard.price && (
               <span
                 style={{
                   position: "absolute",
@@ -75,10 +75,10 @@ const GiftcardItem: React.FC<Props> = ({ giftcard }) => {
                   boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
                 }}
               >
-                Ahorra ${giftcard.originalPrice - giftcard.price}
+                Ahorra ${giftcard.price - giftcard.price}
               </span>
             )}
-            {giftcard.popular && (
+            {giftcard.category && (
               <span
                 style={{
                   position: "absolute",
@@ -103,9 +103,9 @@ const GiftcardItem: React.FC<Props> = ({ giftcard }) => {
               <span style={{ fontWeight: "bold", fontSize: "1.2rem", color: "var(--color-primary)" }}>
                 ${giftcard.price}
               </span>
-              {giftcard.originalPrice && (
+              {giftcard.price && (
                 <span style={{ textDecoration: "line-through", color: "var(--color-muted)", fontSize: "0.9rem" }}>
-                  ${giftcard.originalPrice}
+                  ${giftcard.price}
                 </span>
               )}
             </div>
