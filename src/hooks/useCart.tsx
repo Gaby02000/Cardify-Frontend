@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 
 export interface GiftcardCartItem {
+  id?: number;
   giftcardId: number;
   title: string;
   price: number;
@@ -10,134 +11,143 @@ export interface GiftcardCartItem {
   image?: string;
 }
 
+const CART_STORAGE_KEY = "cart";
+
 export const useCart = () => {
   const [cartItems, setCartItems] = useState<GiftcardCartItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [useBackend, setUseBackend] = useState(false);
 
-  const isAuthenticated = !!localStorage.getItem("auth_token"); // ajustá si usás otro sistema
+  const saveToLocalStorage = (items: GiftcardCartItem[]) => {
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+  };
+
+  const loadFromLocalStorage = (): GiftcardCartItem[] => {
+    try {
+      const data = localStorage.getItem(CART_STORAGE_KEY);
+      return data ? JSON.parse(data) : [];
+    } catch {
+      return [];
+    }
+  };
 
   const fetchCartFromBackend = async () => {
     try {
-      const res = await axios.get("/api/cart", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
-        },
-      });
-      const backendItems: GiftcardCartItem[] = res.data.cart_items.map((item: any) => ({
+      const res = await axios.get("/apis/cart", { withCredentials: true });
+
+      const backendItems: GiftcardCartItem[] = res.data.items.map((item: any) => ({
+        id: item.id,
         giftcardId: item.gift_card_id,
         title: item.gift_card.title,
         price: item.gift_card.price,
         image: item.gift_card.image,
         quantity: item.quantity,
       }));
+
       setCartItems(backendItems);
-    } catch (error) {
-      console.error("Error cargando el carrito del backend", error);
+      setUseBackend(true);
+    } catch (error: any) {
+      // Si no está logueado (ej: 401), usar localStorage
+      console.warn("Usando localStorage para carrito", error?.response?.status);
+      const localItems = loadFromLocalStorage();
+      setCartItems(localItems);
+      setUseBackend(false);
     } finally {
       setLoading(false);
     }
   };
 
-  const syncLocalCartToBackend = async () => {
-    const local = localStorage.getItem("cart");
-    if (!local) return;
-
-    const localItems: GiftcardCartItem[] = JSON.parse(local);
-    try {
-      for (const item of localItems) {
+  const addToCart = async (item: GiftcardCartItem) => {
+    if (useBackend) {
+      try {
         await axios.post(
-          "/api/cart/add",
+          "/apis/cart/add-item",
           {
             gift_card_id: item.giftcardId,
             quantity: item.quantity,
           },
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
-            },
-          }
+          { withCredentials: true }
         );
+        await fetchCartFromBackend();
+      } catch (error) {
+        console.error("Error agregando giftcard al carrito (backend)", error);
       }
-      localStorage.removeItem("cart");
-    } catch (error) {
-      console.error("Error sincronizando carrito local al backend", error);
+    } else {
+      const updated = [...cartItems];
+      const existing = updated.find((i) => i.giftcardId === item.giftcardId);
+      if (existing) {
+        existing.quantity += item.quantity;
+      } else {
+        updated.push(item);
+      }
+      setCartItems(updated);
+      saveToLocalStorage(updated);
     }
   };
 
-  const addToCart = async (item: GiftcardCartItem) => {
-    if (isAuthenticated) {
+  const updateItem = async (cartItemId: number, quantity: number) => {
+    if (useBackend) {
       try {
-        await axios.post(
-          "/api/cart/add",
-          {
-            gift_card_id: item.giftcardId,
-            quantity: item.quantity,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
-            },
-          }
+        await axios.put(
+          `/apis/cart-item/${cartItemId}`,
+          { quantity },
+          { withCredentials: true }
         );
-        fetchCartFromBackend();
+        await fetchCartFromBackend();
       } catch (error) {
-        console.error("Error agregando giftcard al carrito", error);
+        console.error("Error actualizando item (backend)", error);
       }
     } else {
-      setCartItems((prev) => {
-        const index = prev.findIndex((i) => i.giftcardId === item.giftcardId);
-        if (index !== -1) {
-          const updated = [...prev];
-          updated[index].quantity += item.quantity;
-          return updated;
-        }
-        return [...prev, item];
-      });
+      const updated = cartItems.map((item) =>
+        item.giftcardId === cartItemId ? { ...item, quantity } : item
+      );
+      setCartItems(updated);
+      saveToLocalStorage(updated);
+    }
+  };
+
+  const removeItem = async (cartItemId: number) => {
+    if (useBackend) {
+      try {
+        await axios.delete(`/apis/cart-item/${cartItemId}`, {
+          withCredentials: true,
+        });
+        await fetchCartFromBackend();
+      } catch (error) {
+        console.error("Error eliminando item (backend)", error);
+      }
+    } else {
+      const updated = cartItems.filter((item) => item.giftcardId !== cartItemId);
+      setCartItems(updated);
+      saveToLocalStorage(updated);
     }
   };
 
   const clearCart = async () => {
-    if (isAuthenticated) {
+    if (useBackend) {
       try {
-        await axios.delete("/api/cart", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
-          },
-        });
+        await axios.post("/apis/cart/clear", {}, { withCredentials: true });
         setCartItems([]);
       } catch (error) {
-        console.error("Error al vaciar el carrito", error);
+        console.error("Error al vaciar carrito (backend)", error);
       }
     } else {
       setCartItems([]);
-      localStorage.removeItem("cart");
+      localStorage.removeItem(CART_STORAGE_KEY);
     }
   };
 
-  // Al iniciar, cargamos según el estado de autenticación
   useEffect(() => {
-    if (isAuthenticated) {
-      syncLocalCartToBackend().then(fetchCartFromBackend);
-    } else {
-      const stored = localStorage.getItem("cart");
-      if (stored) {
-        setCartItems(JSON.parse(stored));
-      }
-      setLoading(false);
-    }
-  }, [isAuthenticated]);
-
-  // Si no está autenticado, guardamos en localStorage cada vez que cambie
-  useEffect(() => {
-    if (!isAuthenticated) {
-      localStorage.setItem("cart", JSON.stringify(cartItems));
-    }
-  }, [cartItems]);
+    fetchCartFromBackend();
+  }, []);
 
   return {
     cartItems,
     loading,
     addToCart,
+    updateItem,
+    removeItem,
     clearCart,
+    fetchCart: fetchCartFromBackend,
   };
 };

@@ -1,5 +1,6 @@
 import { useCart } from "../../hooks/useCart";
 import { useEffect } from "react";
+import CheckoutButton from "../CheckoutButton";
 
 interface Props {
   open: boolean;
@@ -7,12 +8,12 @@ interface Props {
 }
 
 const CartDrawer = ({ open, onClose }: Props) => {
-  const { cartItems, loading } = useCart();
+  const { cartItems, loading, clearCart } = useCart();
 
   const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+  const totalPrice = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
   useEffect(() => {
-    // Prevenir scroll del fondo cuando está abierto
     document.body.style.overflow = open ? "hidden" : "auto";
     return () => {
       document.body.style.overflow = "auto";
@@ -37,7 +38,7 @@ const CartDrawer = ({ open, onClose }: Props) => {
       }}
     >
       <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <h2 style={{ color: "var(--color-primary)" }}>Shopping Cart</h2>
+        <h2 style={{ color: "var(--color-primary)" }}>Mi carrito</h2>
         <button
           onClick={onClose}
           style={{
@@ -53,15 +54,13 @@ const CartDrawer = ({ open, onClose }: Props) => {
       </div>
 
       <p style={{ color: "var(--color-muted)", marginBottom: "1rem" }}>
-        {totalItems} item{totalItems !== 1 && "s"} in your cart
+        {totalItems} item{totalItems !== 1 && "s"} en tu carrito
       </p>
 
       {loading ? (
-        <p style={{ color: "var(--color-text)" }}>Cargando...</p>
+        <p>Cargando...</p>
       ) : cartItems.length === 0 ? (
-        <p style={{ color: "var(--color-muted)", marginTop: "2rem" }}>
-          Your cart is empty
-        </p>
+        <p>Tu carrito está vacío.</p>
       ) : (
         <>
           <ul
@@ -90,21 +89,26 @@ const CartDrawer = ({ open, onClose }: Props) => {
           </ul>
 
           <div style={{ marginTop: "1rem" }}>
+            <p style={{ fontWeight: "bold" }}>Total: ${totalPrice.toFixed(2)}</p>
+
             <button
+              onClick={clearCart}
               style={{
                 width: "100%",
+                marginTop: "0.5rem",
                 padding: "0.5rem",
-                backgroundColor: "var(--color-primary)",
-                color: "var(--color-bg)",
+                backgroundColor: "#ccc",
+                color: "#000",
                 border: "none",
                 borderRadius: "var(--radius)",
                 fontWeight: "bold",
                 cursor: "pointer",
               }}
-              onClick={onClose}
             >
-              Continuar compra
+              Limpiar carrito
             </button>
+
+            <CheckoutButton />
           </div>
         </>
       )}

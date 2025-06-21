@@ -12,6 +12,8 @@ html, body, #root {
   background-color: var(--color-bg);
   color: var(--color-text);
   scroll-behavior: smooth;
+  margin: 0;
+  padding: 0;
 }
 
 button {

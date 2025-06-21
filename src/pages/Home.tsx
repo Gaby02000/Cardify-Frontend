@@ -1,5 +1,4 @@
 // src/pages/Home.tsx
-import Navbar from "../components/Navbar/Navbar";
 import PopularCategories from "../components/Category/PopularCategories";
 import GiftCardList from "../components/GiftCard/GiftCardList";
 import Footer from "../components/Footer/Footer";
@@ -7,7 +6,6 @@ import Footer from "../components/Footer/Footer";
 const Home = () => {
   return (
     <div>
-      <Navbar />
 
       {/* Hero Section */}
       <section
