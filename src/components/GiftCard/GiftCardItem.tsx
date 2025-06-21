@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import type { GiftCard } from "./types";
-import { useCart } from "../../hooks/useCart";
+import { useCart } from "../../context/CartContext";
 
 interface Props {
   giftcard: GiftCard;

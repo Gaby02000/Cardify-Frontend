@@ -60,17 +60,22 @@ export const useCart = () => {
   const addToCart = async (item: GiftcardCartItem) => {
     if (useBackend) {
       try {
-        await axios.post(
-          "/apis/cart/add-item",
+        const response = await axios.post(
+          `${import.meta.env.VITE_API_URL}/cart/add-item`,
           {
             gift_card_id: item.giftcardId,
             quantity: item.quantity,
           },
           { withCredentials: true }
         );
+        console.log("Item agregado al carrito:", response.data);
+        alert("Agregado al carrito: " + item.title);
         await fetchCartFromBackend();
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error agregando giftcard al carrito (backend)", error);
+        alert(
+          error.response?.data?.message || "No se pudo agregar al carrito"
+        );
       }
     } else {
       const updated = [...cartItems];
@@ -82,6 +87,8 @@ export const useCart = () => {
       }
       setCartItems(updated);
       saveToLocalStorage(updated);
+      console.log("Item agregado localmente:", item);
+      alert("Agregado al carrito: " + item.title);
     }
   };
 
