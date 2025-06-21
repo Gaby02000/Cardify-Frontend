@@ -40,7 +40,20 @@ const CheckoutButton = () => {
   };
 
   return (
-    <button onClick={handleCheckout} style={{ marginTop: "1rem" }}>
+    <button
+      onClick={handleCheckout}
+      style={{
+        width: "100%",
+        marginTop: "0.5rem",
+        padding: "0.5rem",
+        backgroundColor: "#ccc",
+        color: "#000",
+        border: "none",
+        borderRadius: "var(--radius)",
+        fontWeight: "bold",
+        cursor: "pointer",
+      }}
+    >
       Confirmar compra
     </button>
   );
