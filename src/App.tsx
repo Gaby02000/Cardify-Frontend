@@ -2,11 +2,12 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
+import Register from "./pages/Register";
 import Navbar from "./components/Navbar/Navbar";
 
 const AppWrapper = () => {
   const location = useLocation();
-  const hideNavbarRoutes = ["/login"];
+  const hideNavbarRoutes = ["/login", "/register"];
 
   return (
     <>
@@ -14,6 +15,7 @@ const AppWrapper = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
       </Routes>
     </>
   );

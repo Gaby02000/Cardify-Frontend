@@ -161,11 +161,17 @@ const Login = () => {
               </button>
             )}
 
-            {!user && (
-              <p style={{ color: "var(--color-muted)", marginTop: "1rem", fontSize: "0.9rem" }}>
-                ¿No tienes una cuenta? <a href="/register" style={{ color: "var(--color-primary)" }}>Regístrate</a>
-              </p>
-            )}
+          {!user && (
+            <p style={{ color: "var(--color-muted)", marginTop: "1rem", fontSize: "0.9rem" }}>
+              ¿No tienes una cuenta?{" "}
+              <span
+                onClick={() => navigate("/register")}
+                style={{ color: "var(--color-primary)", fontWeight: "bold", cursor: "pointer" }}
+              >
+                Regístrate
+              </span>
+            </p>
+          )}
           </div>
         </div>
       </main>
