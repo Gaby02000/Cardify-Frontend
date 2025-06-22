@@ -1,68 +1,35 @@
 // src/hooks/useAuth.ts
-import { useState, useEffect } from "react"
+import { useEffect } from "react";
+import { useUser } from "../context/UserContext";
+import axios from "axios";
 
-type User = {
-  id: number
-  name: string
-  email: string
-}
-
-type RegisterPayload = {
-  name: string
-  email: string
-  password: string
-}
+const apiUrl = import.meta.env.VITE_API_URL;
 
 export const useAuth = () => {
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
+  const { user, setUser, logout } = useUser();
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user")
-    if (storedUser) {
-      setUser(JSON.parse(storedUser))
-    }
-    setLoading(false)
-  }, [])
+    const fetchUser = async () => {
+      try {
+        const res = await axios.get(`${apiUrl}/user`, {
+          withCredentials: true,
+        });
+        setUser(res.data.user); // ✅ Extrae solo el objeto user
+      } catch (err) {
+        // Usuario no autenticado
+      }
+    };
 
-  const login = async (email: string, password: string) => {
-    // Simulación de login (sin verificación real)
-    const storedUser = localStorage.getItem("registeredUser")
-    if (!storedUser) {
-      throw new Error("Usuario no registrado")
+    if (!user) {
+      fetchUser();
     }
+  }, []);
 
-    const parsed = JSON.parse(storedUser)
-    if (parsed.email === email && parsed.password === password) {
-      const loggedUser: User = { id: 1, name: parsed.name, email: parsed.email }
-      localStorage.setItem("user", JSON.stringify(loggedUser))
-      setUser(loggedUser)
-    } else {
-      throw new Error("Credenciales inválidas")
-    }
-  }
-
-  const register = async ({ name, email, password }: RegisterPayload) => {
-    const registeredUser = {
-      name,
-      email,
-      password,
-    }
-    // Simula guardar usuario (de forma insegura, solo para demo)
-    localStorage.setItem("registeredUser", JSON.stringify(registeredUser))
-  }
-
-  const logout = () => {
-    localStorage.removeItem("user")
-    setUser(null)
-  }
+  const isAuthenticated = !!user;
 
   return {
     user,
-    login,
-    register,
+    isAuthenticated,
     logout,
-    loading,
-    isAuthenticated: !!user,
-  }
-}
+  };
+};

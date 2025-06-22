@@ -24,7 +24,7 @@ const Register = () => {
         }
       );
 
-      alert("Usuario registrado correctamente");
+      // alert("Usuario registrado correctamente");
       navigate("/login");
     } catch (error: any) {
       console.error("Error al registrarse", error);

@@ -27,12 +27,15 @@ const CheckoutButton = () => {
         body: JSON.stringify({}),
       });
 
-      if (!res.ok) throw new Error("Error al crear orden");
+      if (!res.ok) {
+        navigate("/order-failed");
+        return;
+      }
       //const order = await res.json();
 
-      alert("Orden creada exitosamente!");
+      //alert("Orden creada exitosamente!");
       //clearCart();
-      navigate("/orden-confirmada");
+      navigate("/order-confirmed");
     } catch (err) {
       console.error(err);
       alert("Error al procesar la orden");

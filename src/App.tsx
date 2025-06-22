@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from "react-route
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ConfirmedOrder from "./pages/ConfirmedOrder";
+import FailedOrder from "./pages/FailedOrder";
 import Navbar from "./components/Navbar/Navbar";
 
 const AppWrapper = () => {
@@ -16,6 +18,8 @@ const AppWrapper = () => {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/order-confirmed" element={<ConfirmedOrder />} />
+        <Route path="/order-failed" element={<FailedOrder />} />
       </Routes>
     </>
   );
