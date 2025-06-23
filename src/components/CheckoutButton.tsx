@@ -1,65 +1,75 @@
 // src/components/CheckoutButton.tsx
+import { useState, useEffect } from "react";
 
-//import { useCart } from "../hooks/useCart";
-import { useAuth } from "../hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+// Agregar este bloque para evitar el error "Property 'MercadoPago' does not exist on type 'Window'"
+declare global {
+  interface Window {
+    MercadoPago: any;
+  }
+}
+
 const apiUrl = import.meta.env.VITE_API_URL;
+const publicKey = import.meta.env.VITE_MP_PUBLIC_KEY; // Asegurate de tener esto en tu .env
 
-const CheckoutButton = () => {
-  // const { cartItems, clearCart } = useCart();
-  const { isAuthenticated } = useAuth();
-  const navigate = useNavigate();
+export default function CheckoutButton({ cartData }: { cartData?: any }) {
+  const [preferenceId, setPreferenceId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleCheckout = async () => {
-    if (!isAuthenticated) {
-      navigate("/login");
-      return;
-    }
-
+    setLoading(true);
     try {
-      // Crear la orden directamente (el backend tomará el carrito del usuario autenticado)
       const res = await fetch(`${apiUrl}/orders`, {
         method: "POST",
-        credentials: "include", // importante para enviar la cookie de sesión de Sanctum (cuando lo tengas)
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({}),
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(cartData || {}),
       });
 
-      if (!res.ok) {
-        navigate("/order-failed");
-        return;
-      }
-      //const order = await res.json();
+      const data = await res.json();
 
-      //alert("Orden creada exitosamente!");
-      //clearCart();
-      navigate("/order-confirmed");
+      if (res.ok && data.preference_id) {
+        setPreferenceId(data.preference_id);
+      } else {
+        alert("Error al crear orden: " + (data?.message || "desconocido"));
+      }
     } catch (err) {
-      console.error(err);
-      alert("Error al procesar la orden");
+      console.error("Error:", err);
+      alert("Error interno al intentar procesar la orden.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  return (
-    <button
-      onClick={handleCheckout}
-      style={{
-        width: "100%",
-        marginTop: "0.5rem",
-        padding: "0.5rem",
-        backgroundColor: "#ccc",
-        color: "#000",
-        border: "none",
-        borderRadius: "var(--radius)",
-        fontWeight: "bold",
-        cursor: "pointer",
-      }}
-    >
-      Confirmar compra
-    </button>
-  );
-};
+  useEffect(() => {
+    if (preferenceId && window.MercadoPago) {
+      // Inicializar el SDK
+      const mp = new window.MercadoPago(publicKey, {
+        locale: "es-AR",
+      });
 
-export default CheckoutButton;
+      // Renderizar el botón de pago
+      mp.bricks().create("wallet", "wallet_container", {
+        initialization: {
+          preferenceId,
+        },
+        customization: {
+          texts: {
+            valueProp: "smart_option",
+          },
+        },
+      });
+    }
+  }, [preferenceId]);
+
+  return (
+    <div>
+      {!preferenceId ? (
+        <button onClick={handleCheckout} disabled={loading}>
+          {loading ? "Procesando..." : "Confirmar Compra"}
+        </button>
+      ) : (
+        <div id="wallet_container" />
+      )}
+    </div>
+  );
+}
