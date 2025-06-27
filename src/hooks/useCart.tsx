@@ -12,6 +12,22 @@ export interface GiftcardCartItem {
 }
 
 const CART_STORAGE_KEY = "cart";
+const SESSION_ID_KEY = "session_id";
+
+const getSessionId = (): string => {
+  let id = localStorage.getItem(SESSION_ID_KEY);
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem(SESSION_ID_KEY, id);
+  }
+  return id;
+};
+
+const saveSessionId = (id: string) => {
+  localStorage.setItem(SESSION_ID_KEY, id);
+};
+
+const apiUrl = import.meta.env.VITE_API_URL; // ✅
 
 export const useCart = () => {
   const [cartItems, setCartItems] = useState<GiftcardCartItem[]>([]);
@@ -33,21 +49,30 @@ export const useCart = () => {
 
   const fetchCartFromBackend = async () => {
     try {
-      const res = await axios.get("/apis/cart", { withCredentials: true });
+      const sessionId = getSessionId();
 
-      const backendItems: GiftcardCartItem[] = res.data.items.map((item: any) => ({
-        id: item.id,
-        giftcardId: item.gift_card_id,
-        title: item.gift_card.title,
-        price: item.gift_card.price,
-        image: item.gift_card.image,
-        quantity: item.quantity,
-      }));
+      const res = await axios.get(`${apiUrl}/cart`, {
+        withCredentials: true,
+        params: { session_id: sessionId },
+      });
+
+      const backendItems: GiftcardCartItem[] =
+        res.data.cart?.cart_items?.map((item: any) => ({
+          id: item.id,
+          giftcardId: item.gift_card_id,
+          title: item.gift_card.title,
+          price: item.gift_card.price,
+          image: item.gift_card.image,
+          quantity: item.quantity,
+        })) || [];
 
       setCartItems(backendItems);
-      setUseBackend(true);
+      setUseBackend(res.data.user_id !== null);
+
+      if (res.data.session_id) {
+        saveSessionId(res.data.session_id);
+      }
     } catch (error: any) {
-      // Si no está logueado (ej: 401), usar localStorage
       console.warn("Usando localStorage para carrito", error?.response?.status);
       const localItems = loadFromLocalStorage();
       setCartItems(localItems);
@@ -60,15 +85,16 @@ export const useCart = () => {
   const addToCart = async (item: GiftcardCartItem) => {
     if (useBackend) {
       try {
-        const response = await axios.post(
-          `${import.meta.env.VITE_API_URL}/cart/add-item`,
+        const sessionId = getSessionId();
+        await axios.post(
+          `${apiUrl}/cart/add-item`,
           {
             gift_card_id: item.giftcardId,
             quantity: item.quantity,
+            session_id: sessionId,
           },
           { withCredentials: true }
         );
-        console.log("Item agregado al carrito:", response.data);
         alert("Agregado al carrito: " + item.title);
         await fetchCartFromBackend();
       } catch (error: any) {
@@ -87,7 +113,6 @@ export const useCart = () => {
       }
       setCartItems(updated);
       saveToLocalStorage(updated);
-      console.log("Item agregado localmente:", item);
       alert("Agregado al carrito: " + item.title);
     }
   };
@@ -96,7 +121,7 @@ export const useCart = () => {
     if (useBackend) {
       try {
         await axios.put(
-          `/apis/cart-item/${cartItemId}`,
+          `${apiUrl}/cart-item/${cartItemId}`,
           { quantity },
           { withCredentials: true }
         );
@@ -116,8 +141,10 @@ export const useCart = () => {
   const removeItem = async (cartItemId: number) => {
     if (useBackend) {
       try {
-        await axios.delete(`/apis/cart-item/${cartItemId}`, {
+        const sessionId = getSessionId();
+        await axios.delete(`${apiUrl}/cart-item/${cartItemId}`, {
           withCredentials: true,
+          data: { session_id: sessionId },
         });
         await fetchCartFromBackend();
       } catch (error) {
@@ -133,7 +160,12 @@ export const useCart = () => {
   const clearCart = async () => {
     if (useBackend) {
       try {
-        await axios.post("/apis/cart/clear", {}, { withCredentials: true });
+        const sessionId = getSessionId();
+        await axios.post(
+          `${apiUrl}/cart/clear`,
+          { session_id: sessionId },
+          { withCredentials: true }
+        );
         setCartItems([]);
       } catch (error) {
         console.error("Error al vaciar carrito (backend)", error);

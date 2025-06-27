@@ -12,7 +12,7 @@ export const useAuth = () => {
     const fetchUser = async () => {
       try {
         const res = await axios.get(`${apiUrl}/user`, {
-          withCredentials: true,
+          withCredentials: false,
         });
         setUser(res.data.user); // ✅ Extrae solo el objeto user
       } catch (err) {

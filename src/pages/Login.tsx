@@ -2,6 +2,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { useUser } from "../context/UserContext";
+import { useCart } from "../context/CartContext"; // ✅ Importar contexto del carrito
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
@@ -9,30 +10,23 @@ const Login = () => {
   const [password, setPassword] = useState("");
 
   const { user, setUser, logout } = useUser();
+  const { fetchCart } = useCart(); // ✅ Importar método para refrescar carrito
   const navigate = useNavigate();
 
   const handleLogin = async () => {
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/login`,
-        {
-          email,
-          password,
-        },
-        {
-          withCredentials: true, // ¡IMPORTANTE! Para que se guarde la sesión
-        }
+        { email, password },
+        { withCredentials: true }
       );
 
       const user = response.data.user;
       console.log("Login exitoso:", user);
       setUser(user);
-      // alert("Bienvenido, " + user.name);
-      navigate("/"); // Redireccionar al home
-      // Aquí podés guardar el usuario en contexto o redirigir:
-      // Por ejemplo: navigate("/dashboard"); si usás react-router
 
-      // alert("Bienvenido, " + user.name);
+      await fetchCart(); // ✅ Refrescar carrito desde backend fusionado
+      navigate("/");
 
     } catch (error: any) {
       console.error("Error al iniciar sesión", error);
@@ -42,7 +36,6 @@ const Login = () => {
     }
   };
 
-  
   const handleLogout = async () => {
     try {
       await axios.post(
@@ -58,7 +51,6 @@ const Login = () => {
 
   return (
     <div>
-
       <main
         style={{
           position: "relative",
@@ -71,7 +63,7 @@ const Login = () => {
           overflow: "hidden",
         }}
       >
-        {/* Background layers como en Home */}
+        {/* Background layers */}
         <div
           style={{
             position: "absolute",
@@ -161,21 +153,30 @@ const Login = () => {
               </button>
             )}
 
-          {!user && (
-            <p style={{ color: "var(--color-muted)", marginTop: "1rem", fontSize: "0.9rem" }}>
-              ¿No tienes una cuenta?{" "}
-              <span
-                onClick={() => navigate("/register")}
-                style={{ color: "var(--color-primary)", fontWeight: "bold", cursor: "pointer" }}
+            {!user && (
+              <p
+                style={{
+                  color: "var(--color-muted)",
+                  marginTop: "1rem",
+                  fontSize: "0.9rem",
+                }}
               >
-                Regístrate
-              </span>
-            </p>
-          )}
+                ¿No tienes una cuenta?{" "}
+                <span
+                  onClick={() => navigate("/register")}
+                  style={{
+                    color: "var(--color-primary)",
+                    fontWeight: "bold",
+                    cursor: "pointer",
+                  }}
+                >
+                  Regístrate
+                </span>
+              </p>
+            )}
           </div>
         </div>
       </main>
-
     </div>
   );
 };

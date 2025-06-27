@@ -6,13 +6,14 @@ import Register from "./pages/Register";
 import ConfirmedOrder from "./pages/ConfirmedOrder";
 import FailedOrder from "./pages/FailedOrder";
 import Navbar from "./components/Navbar/Navbar";
+import AuthLoader from "./components/AuthLoader";
 
 const AppWrapper = () => {
   const location = useLocation();
   const hideNavbarRoutes = ["/login", "/register"];
 
   return (
-    <>
+    <AuthLoader>
       {!hideNavbarRoutes.includes(location.pathname) && <Navbar />}
       <Routes>
         <Route path="/" element={<Home />} />
@@ -21,7 +22,7 @@ const AppWrapper = () => {
         <Route path="/order-confirmed" element={<ConfirmedOrder />} />
         <Route path="/order-failed" element={<FailedOrder />} />
       </Routes>
-    </>
+    </AuthLoader>
   );
 };
 
