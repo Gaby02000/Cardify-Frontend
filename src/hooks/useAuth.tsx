@@ -12,11 +12,13 @@ export const useAuth = () => {
     const fetchUser = async () => {
       try {
         const res = await axios.get(`${apiUrl}/user`, {
-          withCredentials: false,
+          withCredentials: true,
         });
         setUser(res.data.user); // ✅ Extrae solo el objeto user
       } catch (err) {
         // Usuario no autenticado
+        console.log("No hay sesión activa.");
+        setUser(null); // Por claridad
       }
     };
 

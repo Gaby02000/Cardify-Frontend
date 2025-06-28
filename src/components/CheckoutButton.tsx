@@ -33,7 +33,9 @@ export default function CheckoutButton({ cartData }: { cartData?: GiftcardCartIt
       const res = await fetch(`${apiUrl}/orders`, {
         method: "POST",
         credentials: "include",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json",
+          "x-vercel-protection-bypass": import.meta.env.protectionBypassToken,
+        },
         body: JSON.stringify({ items: payload }), // Asume que tu backend espera { items: [...] }
       });
 
