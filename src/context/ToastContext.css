@@ -29,6 +29,12 @@
     transform: translateY(-10px) scale(0.98);
   }
 }
+@keyframes toast-in-side {
+  from {
+    opacity: 0;
+    transform: translateX(24px) scale(0.98);
+  }
+}
 
 .toast--success {
   border-left-color: var(--success);
@@ -70,9 +76,16 @@
   color: var(--text);
 }
 
+/* Desktop / tablet: esquina inferior derecha, despejada de la navbar. */
 @media (min-width: 560px) {
   .toasts {
+    top: auto;
     left: auto;
-    width: min(380px, calc(100vw - 24px));
+    bottom: 20px;
+    right: 20px;
+    width: min(400px, calc(100vw - 40px));
+  }
+  .toast {
+    animation-name: toast-in-side;
   }
 }
