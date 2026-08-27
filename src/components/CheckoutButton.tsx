@@ -1,19 +1,9 @@
 // src/components/CheckoutButton.tsx
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import api, { getSessionId, getToken } from "../lib/api";
 import type { GiftcardCartItem } from "../hooks/useCart";
 
-// Definir 'window.MercadoPago'
-declare global {
-  interface Window {
-    MercadoPago: any;
-  }
-}
-
-const apiUrl = import.meta.env.VITE_API_URL;
-const publicKey = import.meta.env.VITE_MP_PUBLIC_KEY;
-
 export default function CheckoutButton({ cartData }: { cartData?: GiftcardCartItem[] }) {
-  const [preferenceId, setPreferenceId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleCheckout = async () => {
@@ -21,74 +11,59 @@ export default function CheckoutButton({ cartData }: { cartData?: GiftcardCartIt
       alert("Tu carrito está vacío.");
       return;
     }
+    if (!getToken()) {
+      alert("Debes iniciar sesión para confirmar la compra.");
+      return;
+    }
 
     setLoading(true);
-
     try {
-      const payload = cartData.map((item) => ({
-        gift_card_id: item.giftcardId,
-        quantity: item.quantity,
-      }));
-
-      const res = await fetch(`${apiUrl}/orders`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items: payload }), // Asume que tu backend espera { items: [...] }
+      const res = await api.post(`/orders`, {
+        items: cartData.map((i) => ({
+          gift_card_id: i.giftcardId,
+          quantity: i.quantity,
+        })),
+        session_id: getSessionId(),
       });
 
-      const data = await res.json();
+      // Checkout Pro: redirigimos al link de pago de Mercado Pago.
+      const url: string | undefined =
+        res.data.init_point || res.data.sandbox_init_point;
 
-      if (res.ok && data.preference_id) {
-        setPreferenceId(data.preference_id);
+      if (url) {
+        window.location.href = url;
       } else {
-        alert("Error al crear la orden: " + (data?.message || "desconocido"));
+        alert("No se recibió el link de pago de Mercado Pago.");
       }
-    } catch (err) {
-      console.error("Error:", err);
-      alert("Error interno al intentar procesar la orden.");
+    } catch (err: any) {
+      console.error("Checkout error:", err);
+      alert(
+        err.response?.data?.message ||
+          err.response?.data?.error ||
+          "No se pudo iniciar el pago."
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (preferenceId && window.MercadoPago) {
-      const mp = new window.MercadoPago(publicKey, { locale: "es-AR" });
-
-      mp.bricks().create("wallet", "wallet_container", {
-        initialization: { preferenceId },
-        customization: {
-          texts: {
-            valueProp: "smart_option",
-          },
-        },
-      });
-    }
-  }, [preferenceId]);
-
   return (
-    <div style={{ marginTop: "1rem" }}>
-      {!preferenceId ? (
-        <button
-          onClick={handleCheckout}
-          disabled={loading}
-          style={{
-            width: "100%",
-            padding: "0.75rem",
-            backgroundColor: "var(--color-primary)",
-            color: "white",
-            border: "none",
-            borderRadius: "var(--radius)",
-            fontWeight: "bold",
-            cursor: "pointer",
-          }}
-        >
-          {loading ? "Procesando..." : "Confirmar Compra"}
-        </button>
-      ) : (
-        <div id="wallet_container" />
-      )}
-    </div>
+    <button
+      onClick={handleCheckout}
+      disabled={loading}
+      style={{
+        width: "100%",
+        marginTop: "0.5rem",
+        padding: "0.75rem",
+        backgroundColor: "var(--color-primary)",
+        color: "white",
+        border: "none",
+        borderRadius: "var(--radius)",
+        fontWeight: "bold",
+        cursor: loading ? "default" : "pointer",
+      }}
+    >
+      {loading ? "Procesando..." : "Confirmar compra"}
+    </button>
   );
 }
