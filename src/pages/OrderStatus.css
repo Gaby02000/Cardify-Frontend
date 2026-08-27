@@ -23,6 +23,16 @@
 .ostatus--fail .ostatus__blob {
   background: rgba(255, 84, 112, 0.16);
 }
+.ostatus--wait .ostatus__blob {
+  background: rgba(163, 255, 18, 0.12);
+}
+.ostatus--wait .ostatus__icon {
+  color: var(--lime);
+  background: var(--lime-dim);
+}
+.ostatus__spin {
+  animation: spin 1s linear infinite;
+}
 
 .ostatus__card {
   position: relative;
@@ -60,4 +70,50 @@
   margin-top: var(--s-3);
   margin-bottom: var(--s-6);
   color: var(--text-muted);
+}
+
+/* --- Lista de códigos --- */
+.ostatus__codes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  margin-bottom: var(--s-6);
+  text-align: left;
+}
+.ostatus__codes li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  padding: var(--s-3);
+  border-radius: var(--r);
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+.ostatus__code-gc {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ostatus__code {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex-shrink: 0;
+  padding: 0.3rem 0.55rem;
+  border-radius: var(--r-sm);
+  background: var(--lime-dim);
+  color: var(--lime);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--fs-sm);
+}
+.ostatus__code:hover {
+  background: rgba(163, 255, 18, 0.22);
+}
+.ostatus__code code {
+  font-family: inherit;
+  letter-spacing: 0.02em;
 }
