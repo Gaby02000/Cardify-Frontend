@@ -10,6 +10,7 @@ export interface GiftcardCartItem {
   price: number;
   quantity: number;
   image?: string;
+  stock?: number;
 }
 
 const CART_STORAGE_KEY = "cart";
@@ -22,6 +23,7 @@ const mapBackendItems = (cart: any): GiftcardCartItem[] =>
     price: Number(item.gift_card?.price),
     image: item.gift_card?.image,
     quantity: item.quantity,
+    stock: item.gift_card?.stock,
   })) ?? [];
 
 export const useCart = () => {
@@ -86,9 +88,13 @@ export const useCart = () => {
         session_id: getSessionId(),
       });
       await fetchCartFromBackend();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error actualizando item", error);
-      toast.error("No se pudo actualizar el carrito");
+      toast.error(
+        error.response?.data?.error ||
+          error.response?.data?.message ||
+          "No se pudo actualizar el carrito"
+      );
     }
   };
 
