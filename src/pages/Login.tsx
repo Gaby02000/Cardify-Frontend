@@ -1,6 +1,6 @@
 // src/pages/Login.tsx
 import { useState } from "react";
-import axios from "axios";
+import api, { setToken, getSessionId } from "../lib/api";
 import { useUser } from "../context/UserContext";
 import { useCart } from "../context/CartContext"; // ✅ Importar contexto del carrito
 import { useNavigate } from "react-router-dom";
@@ -15,37 +15,37 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/login`,
-        { email, password },
-        { withCredentials: true }
-      );
+      const response = await api.post(`/login`, {
+        email,
+        password,
+        session_id: getSessionId(), // ✅ para fusionar el carrito de invitado
+      });
 
-      const user = response.data.user;
+      const { user, token } = response.data;
+      setToken(token); // ✅ guardar el token para las próximas requests
       console.log("Login exitoso:", user);
       setUser(user);
 
       await fetchCart(); // ✅ Refrescar carrito desde backend fusionado
       navigate("/");
-
     } catch (error: any) {
       console.error("Error al iniciar sesión", error);
       alert(
-        error.response?.data?.message || "Ocurrió un error al iniciar sesión"
+        error.response?.data?.error ||
+          error.response?.data?.message ||
+          "Ocurrió un error al iniciar sesión"
       );
     }
   };
 
   const handleLogout = async () => {
     try {
-      await axios.post(
-        `${import.meta.env.VITE_API_URL}/logout`,
-        {},
-        { withCredentials: true }
-      );
-      logout();
+      await api.post(`/logout`, {});
     } catch (error) {
       console.error("Error al cerrar sesión", error);
+    } finally {
+      logout(); // limpia token + usuario cacheado
+      await fetchCart(); // vuelve al carrito de invitado
     }
   };
 

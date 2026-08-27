@@ -1,5 +1,11 @@
 import { createContext, useContext, useState } from "react";
 import type { ReactNode } from "react";
+import {
+  clearSession,
+  getCachedUser,
+  setCachedUser,
+  clearCachedUser,
+} from "../lib/api";
 
 type User = {
   id: number;
@@ -16,10 +22,21 @@ type UserContextType = {
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User>(null);
+  // Se inicializa con el usuario cacheado: al refrescar se ve logueado al instante.
+  const [user, setUserState] = useState<User>(() => getCachedUser<User>());
+
+  const setUser = (next: User) => {
+    if (next) {
+      setCachedUser(next);
+    } else {
+      clearCachedUser();
+    }
+    setUserState(next);
+  };
 
   const logout = () => {
-    setUser(null);
+    clearSession();
+    setUserState(null);
   };
 
   return (

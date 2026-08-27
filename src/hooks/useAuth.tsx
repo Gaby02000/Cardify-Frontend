@@ -1,31 +1,47 @@
 // src/hooks/useAuth.ts
 import { useEffect } from "react";
 import { useUser } from "../context/UserContext";
-import axios from "axios";
-
-const apiUrl = import.meta.env.VITE_API_URL;
+import api, { getToken, clearToken } from "../lib/api";
 
 export const useAuth = () => {
-  const { user, setUser, logout } = useUser();
+  const { user, setUser, logout: doLogout } = useUser();
 
   useEffect(() => {
-    const fetchUser = async () => {
+    const revalidate = async () => {
+      if (!getToken()) {
+        // No hay token: aseguramos que no quede un usuario cacheado huérfano.
+        if (user) setUser(null);
+        return;
+      }
+
       try {
-        const res = await axios.get(`${apiUrl}/user`, {
-          withCredentials: false,
-        });
-        setUser(res.data.user); // ✅ Extrae solo el objeto user
-      } catch (err) {
-        // Usuario no autenticado
+        const res = await api.get(`/user`);
+        setUser(res.data.user);
+      } catch (err: any) {
+        // Solo cerramos sesión si el backend rechaza el token (401).
+        // Ante un error de red / servidor caído mantenemos la sesión cacheada.
+        if (err?.response?.status === 401) {
+          clearToken();
+          setUser(null);
+        }
       }
     };
 
-    if (!user) {
-      fetchUser();
-    }
+    revalidate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const isAuthenticated = !!user;
+
+  const logout = async () => {
+    try {
+      if (getToken()) await api.post(`/logout`, {});
+    } catch {
+      /* aunque falle en el server, limpiamos localmente */
+    } finally {
+      doLogout();
+    }
+  };
 
   return {
     user,

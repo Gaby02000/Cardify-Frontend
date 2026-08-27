@@ -1,6 +1,6 @@
 // src/hooks/useCart.ts
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api, { getSessionId } from "../lib/api";
 
 export interface GiftcardCartItem {
   id?: number;
@@ -12,27 +12,20 @@ export interface GiftcardCartItem {
 }
 
 const CART_STORAGE_KEY = "cart";
-const SESSION_ID_KEY = "session_id";
 
-const getSessionId = (): string => {
-  let id = localStorage.getItem(SESSION_ID_KEY);
-  if (!id) {
-    id = crypto.randomUUID();
-    localStorage.setItem(SESSION_ID_KEY, id);
-  }
-  return id;
-};
-
-const saveSessionId = (id: string) => {
-  localStorage.setItem(SESSION_ID_KEY, id);
-};
-
-const apiUrl = import.meta.env.VITE_API_URL; // ✅
+const mapBackendItems = (cart: any): GiftcardCartItem[] =>
+  cart?.cart_items?.map((item: any) => ({
+    id: item.id,
+    giftcardId: item.gift_card_id,
+    title: item.gift_card?.title,
+    price: Number(item.gift_card?.price),
+    image: item.gift_card?.image,
+    quantity: item.quantity,
+  })) ?? [];
 
 export const useCart = () => {
   const [cartItems, setCartItems] = useState<GiftcardCartItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [useBackend, setUseBackend] = useState(false);
 
   const saveToLocalStorage = (items: GiftcardCartItem[]) => {
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
@@ -48,129 +41,71 @@ export const useCart = () => {
   };
 
   const fetchCartFromBackend = async () => {
+    setLoading(true);
     try {
-      const sessionId = getSessionId();
-
-      const res = await axios.get(`${apiUrl}/cart`, {
-        withCredentials: true,
-        params: { session_id: sessionId },
+      const res = await api.get(`/cart`, {
+        params: { session_id: getSessionId() },
       });
 
-      const backendItems: GiftcardCartItem[] =
-        res.data.cart?.cart_items?.map((item: any) => ({
-          id: item.id,
-          giftcardId: item.gift_card_id,
-          title: item.gift_card.title,
-          price: item.gift_card.price,
-          image: item.gift_card.image,
-          quantity: item.quantity,
-        })) || [];
-
-      setCartItems(backendItems);
-      setUseBackend(res.data.user_id !== null);
-
-      if (res.data.session_id) {
-        saveSessionId(res.data.session_id);
-      }
+      const items = mapBackendItems(res.data.cart);
+      setCartItems(items);
+      saveToLocalStorage(items);
     } catch (error: any) {
-      console.warn("Usando localStorage para carrito", error?.response?.status);
-      const localItems = loadFromLocalStorage();
-      setCartItems(localItems);
-      setUseBackend(false);
+      console.warn("Carrito: fallback a localStorage", error?.response?.status);
+      setCartItems(loadFromLocalStorage());
     } finally {
       setLoading(false);
     }
   };
 
   const addToCart = async (item: GiftcardCartItem) => {
-    if (useBackend) {
-      try {
-        const sessionId = getSessionId();
-        await axios.post(
-          `${apiUrl}/cart/add-item`,
-          {
-            gift_card_id: item.giftcardId,
-            quantity: item.quantity,
-            session_id: sessionId,
-          },
-          { withCredentials: true }
-        );
-        alert("Agregado al carrito: " + item.title);
-        await fetchCartFromBackend();
-      } catch (error: any) {
-        console.error("Error agregando giftcard al carrito (backend)", error);
-        alert(
-          error.response?.data?.message || "No se pudo agregar al carrito"
-        );
-      }
-    } else {
-      const updated = [...cartItems];
-      const existing = updated.find((i) => i.giftcardId === item.giftcardId);
-      if (existing) {
-        existing.quantity += item.quantity;
-      } else {
-        updated.push(item);
-      }
-      setCartItems(updated);
-      saveToLocalStorage(updated);
+    try {
+      await api.post(`/cart/add-item`, {
+        gift_card_id: item.giftcardId,
+        quantity: item.quantity,
+        session_id: getSessionId(),
+      });
       alert("Agregado al carrito: " + item.title);
+      await fetchCartFromBackend();
+    } catch (error: any) {
+      console.error("Error agregando giftcard al carrito", error);
+      alert(
+        error.response?.data?.error ||
+          error.response?.data?.message ||
+          "No se pudo agregar al carrito"
+      );
     }
   };
 
   const updateItem = async (cartItemId: number, quantity: number) => {
-    if (useBackend) {
-      try {
-        await axios.put(
-          `${apiUrl}/cart-item/${cartItemId}`,
-          { quantity },
-          { withCredentials: true }
-        );
-        await fetchCartFromBackend();
-      } catch (error) {
-        console.error("Error actualizando item (backend)", error);
-      }
-    } else {
-      const updated = cartItems.map((item) =>
-        item.giftcardId === cartItemId ? { ...item, quantity } : item
-      );
-      setCartItems(updated);
-      saveToLocalStorage(updated);
+    try {
+      await api.put(`/cart-item/${cartItemId}`, {
+        quantity,
+        session_id: getSessionId(),
+      });
+      await fetchCartFromBackend();
+    } catch (error) {
+      console.error("Error actualizando item", error);
     }
   };
 
   const removeItem = async (cartItemId: number) => {
-    if (useBackend) {
-      try {
-        const sessionId = getSessionId();
-        await axios.delete(`${apiUrl}/cart-item/${cartItemId}`, {
-          withCredentials: true,
-          data: { session_id: sessionId },
-        });
-        await fetchCartFromBackend();
-      } catch (error) {
-        console.error("Error eliminando item (backend)", error);
-      }
-    } else {
-      const updated = cartItems.filter((item) => item.giftcardId !== cartItemId);
-      setCartItems(updated);
-      saveToLocalStorage(updated);
+    try {
+      await api.delete(`/cart-item/${cartItemId}`, {
+        data: { session_id: getSessionId() },
+      });
+      await fetchCartFromBackend();
+    } catch (error) {
+      console.error("Error eliminando item", error);
     }
   };
 
   const clearCart = async () => {
-    if (useBackend) {
-      try {
-        const sessionId = getSessionId();
-        await axios.post(
-          `${apiUrl}/cart/clear`,
-          { session_id: sessionId },
-          { withCredentials: true }
-        );
-        setCartItems([]);
-      } catch (error) {
-        console.error("Error al vaciar carrito (backend)", error);
-      }
-    } else {
+    try {
+      await api.post(`/cart/clear`, { session_id: getSessionId() });
+    } catch (error) {
+      console.error("Error al vaciar carrito", error);
+    } finally {
       setCartItems([]);
       localStorage.removeItem(CART_STORAGE_KEY);
     }
