@@ -45,6 +45,8 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
+        // Handlers de Web Push (push / notificationclick) inyectados al SW generado.
+        importScripts: ['/sw-push.js'],
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/apis\//, /^\/api\//, /^\/admin/],
         cleanupOutdatedCaches: true,

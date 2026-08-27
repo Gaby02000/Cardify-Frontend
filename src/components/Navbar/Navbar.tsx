@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Menu, X, ShoppingCart, LogOut, LogIn } from "lucide-react";
 import CartDrawer from "../Cart/CartDrawer";
+import PushOptIn from "../PushOptIn";
 import { useUser } from "../../context/UserContext";
 import { useCart } from "../../context/CartContext";
 import "./Navbar.css";
@@ -63,6 +64,8 @@ const Navbar = () => {
           </nav>
 
           <div className="nav__actions">
+            <PushOptIn />
+
             <button
               className="nav__cart"
               onClick={() => setCartOpen(true)}
@@ -100,6 +103,7 @@ const Navbar = () => {
                   {l.label}
                 </a>
               ))}
+              <PushOptIn block />
               <AuthButton block />
             </div>
           </div>

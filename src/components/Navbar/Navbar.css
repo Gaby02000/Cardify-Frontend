@@ -73,6 +73,16 @@
   border-color: var(--lime);
   color: var(--lime);
 }
+.nav__cart--on,
+.nav__cart--on:hover {
+  border-color: var(--lime);
+  color: var(--lime);
+  background: var(--lime-dim);
+}
+.nav__cart:disabled {
+  opacity: 0.5;
+  cursor: progress;
+}
 .nav__cart-count {
   position: absolute;
   top: -4px;
