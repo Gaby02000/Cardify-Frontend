@@ -66,7 +66,7 @@ const Home = () => {
               animation: "pulse 2s infinite",
             }}
           >
-            Digital Gift Cards
+            Gift Cards
           </h1>
           <p
             style={{

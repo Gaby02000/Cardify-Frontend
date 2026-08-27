@@ -12,7 +12,7 @@ const Footer = () => {
       >
         <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: "2rem", maxWidth: "1200px", margin: "0 auto" }}>
           <div>
-            <h2 style={{ color: "var(--color-primary)", textShadow: "var(--shadow-primary)" }}>⚡ NeonCards</h2>
+            <h2 style={{ color: "var(--color-primary)", textShadow: "var(--shadow-primary)" }}>Cardify</h2>
             <p style={{ maxWidth: 240 }}>The future of digital gifting. Premium gift cards for the digital age.</p>
           </div>
   
@@ -48,7 +48,7 @@ const Footer = () => {
         </div>
   
         <p style={{ textAlign: "center", marginTop: "3rem", fontSize: "0.875rem", opacity: 0.6 }}>
-          © 2024 NeonCards. All rights reserved. Built for the digital future.
+          © 2025 Cardify. All rights reserved. Built for the digital future.
         </p>
       </footer>
     );
