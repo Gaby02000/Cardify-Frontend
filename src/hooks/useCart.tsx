@@ -1,6 +1,7 @@
 // src/hooks/useCart.ts
 import { useEffect, useState } from "react";
 import api, { getSessionId } from "../lib/api";
+import { useToast } from "../context/ToastContext";
 
 export interface GiftcardCartItem {
   id?: number;
@@ -24,6 +25,7 @@ const mapBackendItems = (cart: any): GiftcardCartItem[] =>
   })) ?? [];
 
 export const useCart = () => {
+  const toast = useToast();
   const [cartItems, setCartItems] = useState<GiftcardCartItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -65,11 +67,11 @@ export const useCart = () => {
         quantity: item.quantity,
         session_id: getSessionId(),
       });
-      alert("Agregado al carrito: " + item.title);
+      toast.success(`Agregado: ${item.title}`);
       await fetchCartFromBackend();
     } catch (error: any) {
       console.error("Error agregando giftcard al carrito", error);
-      alert(
+      toast.error(
         error.response?.data?.error ||
           error.response?.data?.message ||
           "No se pudo agregar al carrito"
@@ -86,6 +88,7 @@ export const useCart = () => {
       await fetchCartFromBackend();
     } catch (error) {
       console.error("Error actualizando item", error);
+      toast.error("No se pudo actualizar el carrito");
     }
   };
 
@@ -97,6 +100,7 @@ export const useCart = () => {
       await fetchCartFromBackend();
     } catch (error) {
       console.error("Error eliminando item", error);
+      toast.error("No se pudo quitar el producto");
     }
   };
 

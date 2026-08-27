@@ -241,6 +241,14 @@ h4 {
   background: rgba(255, 84, 112, 0.12);
 }
 
+.btn-danger-solid {
+  --btn-bg: var(--danger);
+  --btn-fg: #fff;
+}
+.btn-danger-solid:hover {
+  filter: brightness(1.07);
+}
+
 .btn-block {
   width: 100%;
 }

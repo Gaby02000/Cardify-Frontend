@@ -2,6 +2,7 @@
 import { useEffect } from "react";
 import { X, Trash2, ShoppingBag } from "lucide-react";
 import { useCart } from "../../context/CartContext";
+import { useConfirm } from "../../context/ConfirmContext";
 import CheckoutButton from "../CheckoutButton";
 import "./CartDrawer.css";
 
@@ -18,9 +19,21 @@ interface Props {
 
 const CartDrawer = ({ open, onClose }: Props) => {
   const { cartItems, loading, clearCart, removeItem } = useCart();
+  const confirm = useConfirm();
 
   const totalItems = cartItems.reduce((acc, i) => acc + i.quantity, 0);
   const totalPrice = cartItems.reduce((acc, i) => acc + i.price * i.quantity, 0);
+
+  const handleClear = async () => {
+    const ok = await confirm({
+      title: "¿Vaciar el carrito?",
+      message: "Se van a quitar todos los productos que agregaste.",
+      confirmText: "Vaciar",
+      cancelText: "Cancelar",
+      danger: true,
+    });
+    if (ok) clearCart();
+  };
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -104,7 +117,7 @@ const CartDrawer = ({ open, onClose }: Props) => {
               <b>{money(totalPrice)}</b>
             </div>
             <CheckoutButton cartData={cartItems} />
-            <button className="btn btn-danger btn-block" onClick={clearCart}>
+            <button className="btn btn-danger btn-block" onClick={handleClear}>
               <Trash2 size={15} /> Vaciar carrito
             </button>
           </footer>

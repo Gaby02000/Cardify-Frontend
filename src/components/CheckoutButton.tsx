@@ -2,18 +2,20 @@
 import { useState } from "react";
 import { CreditCard } from "lucide-react";
 import api, { getSessionId, getToken } from "../lib/api";
+import { useToast } from "../context/ToastContext";
 import type { GiftcardCartItem } from "../hooks/useCart";
 
 export default function CheckoutButton({ cartData }: { cartData?: GiftcardCartItem[] }) {
   const [loading, setLoading] = useState(false);
+  const toast = useToast();
 
   const handleCheckout = async () => {
     if (!cartData || cartData.length === 0) {
-      alert("Tu carrito está vacío.");
+      toast.error("Tu carrito está vacío.");
       return;
     }
     if (!getToken()) {
-      alert("Debes iniciar sesión para confirmar la compra.");
+      toast.info("Iniciá sesión para confirmar la compra.");
       return;
     }
 
@@ -34,11 +36,11 @@ export default function CheckoutButton({ cartData }: { cartData?: GiftcardCartIt
       if (url) {
         window.location.href = url;
       } else {
-        alert("No se recibió el link de pago de Mercado Pago.");
+        toast.error("No se recibió el link de pago de Mercado Pago.");
       }
     } catch (err: any) {
       console.error("Checkout error:", err);
-      alert(
+      toast.error(
         err.response?.data?.message ||
           err.response?.data?.error ||
           "No se pudo iniciar el pago."
