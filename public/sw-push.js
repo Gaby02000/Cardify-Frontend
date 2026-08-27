@@ -32,8 +32,12 @@ self.addEventListener("notificationclick", (event) => {
     self.clients
       .matchAll({ type: "window", includeUncontrolled: true })
       .then((clientList) => {
+        // Si ya hay una ventana de la PWA abierta, la reusamos.
         for (const client of clientList) {
-          if (client.url.includes(target) && "focus" in client) {
+          if ("focus" in client) {
+            if ("navigate" in client) {
+              client.navigate(target).catch(() => {});
+            }
             return client.focus();
           }
         }
