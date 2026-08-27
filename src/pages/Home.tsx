@@ -1,128 +1,86 @@
 // src/pages/Home.tsx
+import { Sparkles, Zap, ShieldCheck } from "lucide-react";
 import PopularCategories from "../components/Category/PopularCategories";
 import GiftCardList from "../components/GiftCard/GiftCardList";
 import Footer from "../components/Footer/Footer";
+import "./Home.css";
 
 const Home = () => {
   return (
-    <div>
+    <>
+      {/* ---------- Hero ---------- */}
+      <section id="inicio" className="hero">
+        <div className="hero__blob hero__blob--lime" />
+        <div className="hero__blob hero__blob--violet" />
 
-      {/* Hero Section */}
-      <section
-        style={{
-          position: "relative",
-          padding: "var(--spacing-xl) var(--spacing-md)",
-          overflow: "hidden",
-          textAlign: "center",
-        }}
-      >
-        {/* Background layers */}
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background: "linear-gradient(135deg, rgba(53,2,83,0.2), transparent)",
-            zIndex: 0,
-          }}
-        />
-        <div
-          className="animate-pulse"
-          style={{
-            position: "absolute",
-            top: "2rem",
-            left: "2rem",
-            width: "18rem",
-            height: "18rem",
-            backgroundColor: "rgba(149,255,0,0.1)",
-            borderRadius: "50%",
-            filter: "blur(60px)",
-            zIndex: 0,
-          }}
-        />
-        <div
-          className="animate-pulse"
-          style={{
-            position: "absolute",
-            bottom: "2rem",
-            right: "2rem",
-            width: "24rem",
-            height: "24rem",
-            backgroundColor: "rgba(53,2,83,0.3)",
-            borderRadius: "50%",
-            filter: "blur(60px)",
-            zIndex: 0,
-          }}
-        />
+        <div className="container">
+        <div className="hero__inner fade-up">
+          <span className="eyebrow">
+            <Sparkles size={14} /> Regalos digitales al instante
+          </span>
 
-        {/* Content */}
-        <div style={{ position: "relative", zIndex: 1 }}>
-          <h1
-            style={{
-              fontSize: "4rem",
-              background: "linear-gradient(to right, var(--color-primary), white, var(--color-primary))",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              textShadow: "var(--shadow-glow)",
-              animation: "pulse 2s infinite",
-            }}
-          >
-            Gift Cards
+          <h1>
+            Gift cards para el <span className="grad-text">futuro digital</span>
           </h1>
-          <p
-            style={{
-              fontSize: "1.25rem",
-              maxWidth: 600,
-              margin: "1rem auto",
-              color: "var(--color-muted)",
-            }}
-          >
-            Regalos para gamers, techies y amantes del futuro digital.
+
+          <p className="hero__lead">
+            Steam, PlayStation, Netflix y más. Elegís, pagás y recibís el código
+            en tu correo en segundos.
           </p>
-          <div style={{ display: "flex", gap: "1rem", justifyContent: "center", marginTop: "2rem" }}>
-            <button>Explorar Tarjetas</button>
-            <button
-              style={{
-                backgroundColor: "transparent",
-                border: "1px solid var(--color-primary)",
-                color: "var(--color-primary)",
-              }}
-            >
-              Saber más
-            </button>
+
+          <div className="hero__cta">
+            <a href="#giftcards" className="btn btn-primary btn-lg">
+              <Zap size={18} /> Explorar tarjetas
+            </a>
+            <a href="#categorias" className="btn btn-ghost btn-lg">
+              Ver categorías
+            </a>
           </div>
+
+          <div className="hero__stats">
+            <div className="hero__stat">
+              <b>+120</b>
+              <span>Tarjetas</span>
+            </div>
+            <div className="hero__stat">
+              <b>24/7</b>
+              <span>Entrega</span>
+            </div>
+            <div className="hero__stat">
+              <b>100%</b>
+              <span>Seguro</span>
+            </div>
+          </div>
+        </div>
         </div>
       </section>
 
-      {/* Popular Categories */}
-      <section id="categories">
+      {/* ---------- Categorías ---------- */}
+      <section id="categorias" className="section container">
+        <div className="section-head center">
+          <span className="eyebrow">
+            <ShieldCheck size={14} /> Elegí por gusto
+          </span>
+          <h2 className="section-title">Categorías populares</h2>
+          <p>Encontrá la tarjeta perfecta para cada tipo de regalo.</p>
+        </div>
         <PopularCategories />
       </section>
-      
-      {/* GiftCard Grid */}
-      <section 
-        id="giftcards"
-        style={{ padding: " var(--spacing-lg)" }}
-      >
-        <h2
-          style={{
-            textAlign: "center",
-            fontSize: "2rem",
-            color: "var(--color-primary)",
-            marginTop: "var(--spacing-xl)", 
-            marginBottom: "var(--spacing-lg)",
-            textShadow: "var(--shadow-primary)",
-          }}
-        >
-          Explora nuestras Giftcards destacadas
-        </h2>
+
+      {/* ---------- Gift cards ---------- */}
+      <section id="giftcards" className="section container">
+        <div className="section-head center">
+          <span className="eyebrow">
+            <Sparkles size={14} /> Destacadas
+          </span>
+          <h2 className="section-title">Nuestras gift cards</h2>
+          <p>Precios claros, stock real y entrega inmediata.</p>
+        </div>
         <GiftCardList />
       </section>
 
-      <footer id="footer">
-        <Footer />
-      </footer>
-
-    </div>
+      <Footer />
+    </>
   );
 };
 

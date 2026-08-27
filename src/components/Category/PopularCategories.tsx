@@ -1,68 +1,48 @@
 // src/components/Category/PopularCategories.tsx
+import { Gamepad2, Clapperboard, ShoppingBag, Cpu, Music, Gift } from "lucide-react";
+import type { ComponentType } from "react";
 import { useCategories } from "../../hooks/useCategories";
+import "./PopularCategories.css";
+
+const ICONS: Array<[RegExp, ComponentType<{ size?: number }>]> = [
+  [/gam|juego|play|xbox|steam|nintendo/i, Gamepad2],
+  [/film|serie|entreten|netflix|disney|cine|movie/i, Clapperboard],
+  [/moda|fashion|ropa|shop|tienda/i, ShoppingBag],
+  [/tech|tecno|electro|apple|google|micro/i, Cpu],
+  [/music|spotify|audio/i, Music],
+];
+
+const iconFor = (name: string) =>
+  ICONS.find(([re]) => re.test(name))?.[1] ?? Gift;
 
 const PopularCategories = () => {
   const { categories, loading } = useCategories();
 
-  if (loading) return <p style={{ color: "var(--color-text)" }}>Cargando categorías...</p>;
+  if (loading) {
+    return (
+      <div className="cats">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="skeleton cat--skeleton" />
+        ))}
+      </div>
+    );
+  }
 
   return (
-    <section style={{ padding: "var(--spacing-lg) 0" }}>
-        <div
-            style={{
-            maxWidth: "1200px",
-            margin: "0 auto",
-            padding: "0 var(--spacing-md)",
-            }}
-        >
-            <h2
-            style={{
-                textAlign: "center",
-                fontSize: "2rem",
-                color: "var(--color-primary)",
-                marginBottom: "var(--spacing-lg)",
-                textShadow: "var(--shadow-primary)",
-            }}
-            >
-            Categorías Populares
-            </h2>
-            <div
-            style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-                gap: "var(--spacing-md)",
-            }}
-            >
-            {categories.slice(0, 4).map((cat) => (
-                <div
-                key={cat.id}
-                style={{
-                    backgroundColor: "var(--color-surface)",
-                    padding: "var(--spacing-md)",
-                    borderRadius: "var(--radius-lg)",
-                    textAlign: "center",
-                    border: "1px solid var(--color-primary)",
-                    boxShadow: "var(--shadow-sm)",
-                }}
-                >
-                <h3
-                    style={{
-                    fontSize: "1.25rem",
-                    color: "var(--color-primary)",
-                    marginBottom: "0.5rem",
-                    }}
-                >
-                    {cat.name}
-                </h3>
-                <p style={{ color: "var(--color-muted)" }}>
-                    Tarjetas digitales premium
-                </p>
-                </div>
-            ))}
-            </div>
-        </div>
-    </section>
-
+    <div className="cats">
+      {categories.slice(0, 8).map((cat) => {
+        const Icon = iconFor(cat.name);
+        return (
+          <a key={cat.id} href="#giftcards" className="cat">
+            <span className="cat__icon">
+              <Icon size={22} />
+            </span>
+            <span className="cat__name">{cat.name}</span>
+            <span className="cat__desc">Tarjetas digitales premium</span>
+          </a>
+        );
+      })}
+    </div>
   );
 };
 

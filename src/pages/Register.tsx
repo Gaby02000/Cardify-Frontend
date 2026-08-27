@@ -1,15 +1,24 @@
+// src/pages/Register.tsx
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Eye, EyeOff, ArrowLeft, AlertCircle } from "lucide-react";
 import api from "../lib/api";
-import { useNavigate } from "react-router-dom";
+import "./Auth.css";
 
 const Register = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
+  const [showPw, setShowPw] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleRegister = async () => {
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
     try {
       await api.post(`/register`, {
         name,
@@ -17,168 +26,118 @@ const Register = () => {
         password,
         password_confirmation: passwordConfirmation,
       });
-
-      // alert("Usuario registrado correctamente");
       navigate("/login");
-    } catch (error: any) {
-      console.error("Error al registrarse", error);
-      if (error.response?.data?.errors) {
-        const messages = Object.values(error.response.data.errors).flat();
-        alert(messages.join("\n"));
+    } catch (err: any) {
+      if (err.response?.data?.errors) {
+        setError(Object.values(err.response.data.errors).flat().join("\n"));
       } else {
-        alert("Ocurrió un error al registrarse");
+        setError(err.response?.data?.message || "Ocurrió un error al registrarse.");
       }
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <main
-      style={{
-        position: "relative",
-        minHeight: "100vh",
-        padding: "var(--spacing-xl) var(--spacing-md)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: "var(--color-bg)",
-        overflow: "hidden",
-      }}
-    >
-      {/* Background layers */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          background: "linear-gradient(135deg, rgba(53,2,83,0.2), transparent)",
-          zIndex: 0,
-        }}
-      />
-      <div
-        className="animate-pulse"
-        style={{
-          position: "absolute",
-          top: "2rem",
-          left: "2rem",
-          width: "18rem",
-          height: "18rem",
-          backgroundColor: "rgba(149,255,0,0.1)",
-          borderRadius: "50%",
-          filter: "blur(60px)",
-          zIndex: 0,
-        }}
-      />
-      <div
-        className="animate-pulse"
-        style={{
-          position: "absolute",
-          bottom: "2rem",
-          right: "2rem",
-          width: "24rem",
-          height: "24rem",
-          backgroundColor: "rgba(53,2,83,0.3)",
-          borderRadius: "50%",
-          filter: "blur(60px)",
-          zIndex: 0,
-        }}
-      />
+    <main className="auth">
+      <div className="auth__blob auth__blob--a" />
+      <div className="auth__blob auth__blob--b" />
 
-      {/* Register Card */}
-      <div
-        style={{
-          position: "relative",
-          zIndex: 1,
-          backgroundColor: "var(--color-surface)",
-          padding: "2rem",
-          borderRadius: "12px",
-          boxShadow: "var(--shadow-glow)",
-          width: "100%",
-          maxWidth: "400px",
-          textAlign: "center",
-        }}
-      >
-        <h2
-          style={{
-            color: "var(--color-primary)",
-            marginBottom: "1rem",
-            fontSize: "1.75rem",
-            textShadow: "var(--shadow-primary)",
-          }}
-        >
-          Crear cuenta
-        </h2>
+      <div className="auth__card">
+        <span className="auth__brand">
+          <span className="auth__mark">◆</span> Cardify
+        </span>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-          <input
-            type="text"
-            placeholder="Nombre completo"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            style={inputStyle}
-          />
-          <input
-            type="email"
-            placeholder="Correo electrónico"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={inputStyle}
-          />
-          <input
-            type="password"
-            placeholder="Contraseña"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={inputStyle}
-          />
-          <input
-            type="password"
-            placeholder="Confirmar contraseña"
-            value={passwordConfirmation}
-            onChange={(e) => setPasswordConfirmation(e.target.value)}
-            style={inputStyle}
-          />
-          <button onClick={handleRegister} style={buttonStyle}>
-            Registrarse
+        <h1 className="auth__title">Crear cuenta</h1>
+        <p className="auth__subtitle">Unite y empezá a regalar en segundos.</p>
+
+        <form className="auth__form" onSubmit={handleRegister}>
+          {error && (
+            <div className="auth__error">
+              <AlertCircle size={16} /> <span>{error}</span>
+            </div>
+          )}
+
+          <div className="field">
+            <label htmlFor="name">Nombre completo</label>
+            <input
+              id="name"
+              className="input"
+              type="text"
+              autoComplete="name"
+              placeholder="Tu nombre"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="field">
+            <label htmlFor="email">Correo electrónico</label>
+            <input
+              id="email"
+              className="input"
+              type="email"
+              autoComplete="email"
+              placeholder="vos@ejemplo.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="field">
+            <label htmlFor="pw">Contraseña</label>
+            <div className="auth__pw">
+              <input
+                id="pw"
+                className="input"
+                type={showPw ? "text" : "password"}
+                autoComplete="new-password"
+                placeholder="Mínimo 6 caracteres"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPw((s) => !s)}
+                aria-label={showPw ? "Ocultar contraseña" : "Mostrar contraseña"}
+              >
+                {showPw ? <EyeOff size={17} /> : <Eye size={17} />}
+              </button>
+            </div>
+          </div>
+
+          <div className="field">
+            <label htmlFor="pw2">Confirmar contraseña</label>
+            <input
+              id="pw2"
+              className="input"
+              type={showPw ? "text" : "password"}
+              autoComplete="new-password"
+              placeholder="Repetí la contraseña"
+              value={passwordConfirmation}
+              onChange={(e) => setPasswordConfirmation(e.target.value)}
+              required
+            />
+          </div>
+
+          <button className="btn btn-primary btn-block btn-lg" type="submit" disabled={loading}>
+            {loading ? <><span className="spinner" /> Creando…</> : "Registrarse"}
           </button>
+        </form>
 
-          <p
-            style={{
-              color: "var(--color-muted)",
-              marginTop: "1rem",
-              fontSize: "0.9rem",
-            }}
-          >
-            ¿Ya tenés una cuenta?{" "}
-            <a
-              href="/login"
-              style={{ color: "var(--color-primary)", fontWeight: "bold" }}
-            >
-              Iniciar sesión
-            </a>
-          </p>
-        </div>
+        <p className="auth__foot">
+          ¿Ya tenés cuenta? <Link to="/login">Iniciá sesión</Link>
+        </p>
+
+        <Link to="/" className="auth__back">
+          <ArrowLeft size={15} /> Volver a la tienda
+        </Link>
       </div>
     </main>
   );
-};
-
-const inputStyle = {
-  padding: "0.75rem 1rem",
-  borderRadius: "8px",
-  border: "1px solid var(--color-muted)",
-  fontSize: "1rem",
-  backgroundColor: "var(--color-bg)",
-  color: "white",
-};
-
-const buttonStyle = {
-  padding: "0.75rem 1rem",
-  backgroundColor: "var(--color-primary)",
-  color: "var(--color-bg)",
-  border: "none",
-  borderRadius: "8px",
-  fontWeight: "bold" as const,
-  fontSize: "1rem",
-  cursor: "pointer",
 };
 
 export default Register;

@@ -1,5 +1,6 @@
 // src/components/CheckoutButton.tsx
 import { useState } from "react";
+import { CreditCard } from "lucide-react";
 import api, { getSessionId, getToken } from "../lib/api";
 import type { GiftcardCartItem } from "../hooks/useCart";
 
@@ -49,21 +50,19 @@ export default function CheckoutButton({ cartData }: { cartData?: GiftcardCartIt
 
   return (
     <button
+      className="btn btn-primary btn-block btn-lg"
       onClick={handleCheckout}
       disabled={loading}
-      style={{
-        width: "100%",
-        marginTop: "0.5rem",
-        padding: "0.75rem",
-        backgroundColor: "var(--color-primary)",
-        color: "white",
-        border: "none",
-        borderRadius: "var(--radius)",
-        fontWeight: "bold",
-        cursor: loading ? "default" : "pointer",
-      }}
     >
-      {loading ? "Procesando..." : "Confirmar compra"}
+      {loading ? (
+        <>
+          <span className="spinner" /> Procesando…
+        </>
+      ) : (
+        <>
+          <CreditCard size={18} /> Confirmar compra
+        </>
+      )}
     </button>
   );
 }

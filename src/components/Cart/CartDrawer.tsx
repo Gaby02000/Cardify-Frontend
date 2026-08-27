@@ -1,8 +1,15 @@
-// src/components/CartDrawer.tsx
-
-import { useCart } from "../../context/CartContext";
+// src/components/Cart/CartDrawer.tsx
 import { useEffect } from "react";
+import { X, Trash2, ShoppingBag } from "lucide-react";
+import { useCart } from "../../context/CartContext";
 import CheckoutButton from "../CheckoutButton";
+import "./CartDrawer.css";
+
+const API_ORIGIN = (import.meta.env.VITE_API_URL || "").replace(/\/apis\/?$/, "");
+const money = (n: number) =>
+  new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(n);
+const thumb = (image?: string) =>
+  !image ? undefined : /^https?:\/\//.test(image) ? image : `${API_ORIGIN}/${image.replace(/^\/+/, "")}`;
 
 interface Props {
   open: boolean;
@@ -10,124 +17,100 @@ interface Props {
 }
 
 const CartDrawer = ({ open, onClose }: Props) => {
-  const { cartItems, loading, clearCart } = useCart();
+  const { cartItems, loading, clearCart, removeItem } = useCart();
 
-  // Log para debug
-  console.log("CartDrawer cartItems:", cartItems);
-
-  const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
-  const totalPrice = cartItems.reduce(
-    (acc, item) => acc + item.price * item.quantity,
-    0
-  );
+  const totalItems = cartItems.reduce((acc, i) => acc + i.quantity, 0);
+  const totalPrice = cartItems.reduce((acc, i) => acc + i.price * i.quantity, 0);
 
   useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "auto";
+    document.body.style.overflow = open ? "hidden" : "";
     return () => {
-      document.body.style.overflow = "auto";
+      document.body.style.overflow = "";
     };
   }, [open]);
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: 0,
-        right: open ? 0 : "-100%",
-        height: "100%",
-        width: "320px",
-        backgroundColor: "var(--color-surface)",
-        boxShadow: "-2px 0 8px rgba(0, 0, 0, 0.3)",
-        transition: "right 0.3s ease-in-out",
-        zIndex: 1000,
-        padding: "1.5rem",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <h2 style={{ color: "var(--color-primary)" }}>Mi carrito</h2>
-        <button
-          onClick={onClose}
-          style={{
-            background: "transparent",
-            border: "none",
-            color: "var(--color-text)",
-            fontSize: "1.2rem",
-            cursor: "pointer",
-          }}
-        >
-          ✕
-        </button>
-      </div>
+    <>
+      <div
+        className={`drawer__overlay ${open ? "is-open" : ""}`}
+        onClick={onClose}
+        aria-hidden
+      />
 
-      {loading ? (
-        <p>Cargando...</p>
-      ) : (
-        <>
-          <p style={{ color: "var(--color-muted)", marginBottom: "1rem" }}>
-            {totalItems} item{totalItems !== 1 && "s"} en tu carrito
-          </p>
+      <aside
+        className={`drawer ${open ? "is-open" : ""}`}
+        role="dialog"
+        aria-label="Carrito"
+        aria-hidden={!open}
+      >
+        <header className="drawer__head">
+          <h2>
+            Tu carrito <span className="drawer__count">· {totalItems}</span>
+          </h2>
+          <button className="drawer__close" onClick={onClose} aria-label="Cerrar">
+            <X size={18} />
+          </button>
+        </header>
 
-          {cartItems.length === 0 ? (
-            <p>Tu carrito está vacío.</p>
+        <div className="drawer__body">
+          {loading ? (
+            <div className="drawer__empty">Cargando…</div>
+          ) : cartItems.length === 0 ? (
+            <div className="drawer__empty">
+              <ShoppingBag size={40} strokeWidth={1.5} />
+              <p>Tu carrito está vacío.</p>
+            </div>
           ) : (
-            <>
-              <ul
-                style={{
-                  flex: 1,
-                  overflowY: "auto",
-                  listStyle: "none",
-                  padding: 0,
-                  margin: 0,
-                }}
-              >
-                {cartItems.map((item) => (
-                  <li
-                    key={item.giftcardId}
-                    style={{
-                      marginBottom: "1rem",
-                      borderBottom: "1px solid var(--color-muted)",
-                      paddingBottom: "0.5rem",
-                    }}
-                  >
-                    <strong>{item.title}</strong>
-                    <br />
-                    {item.quantity} × ${item.price}
-                  </li>
-                ))}
-              </ul>
-
-              <div style={{ marginTop: "1rem" }}>
-                <p style={{ fontWeight: "bold" }}>
-                  Total: ${totalPrice.toFixed(2)}
-                </p>
-
-                <button
-                  onClick={clearCart}
-                  style={{
-                    width: "100%",
-                    marginTop: "0.5rem",
-                    padding: "0.5rem",
-                    backgroundColor: "#ccc",
-                    color: "#000",
-                    border: "none",
-                    borderRadius: "var(--radius)",
-                    fontWeight: "bold",
-                    cursor: "pointer",
-                  }}
-                >
-                  Limpiar carrito
-                </button>
-
-                {/* Ahora pasamos cartData */}
-                <CheckoutButton cartData={cartItems} />
+            cartItems.map((item) => (
+              <div className="drawer__item" key={item.id ?? item.giftcardId}>
+                {thumb(item.image) ? (
+                  <img className="drawer__thumb" src={thumb(item.image)} alt="" />
+                ) : (
+                  <span className="drawer__thumb" />
+                )}
+                <div>
+                  <h4>{item.title}</h4>
+                  <small>
+                    {item.quantity} × {money(item.price)}
+                  </small>
+                </div>
+                <div className="drawer__line">
+                  <b>{money(item.price * item.quantity)}</b>
+                  {item.id != null && (
+                    <button
+                      className="drawer__remove"
+                      onClick={() => removeItem(item.id!)}
+                      aria-label={`Quitar ${item.title}`}
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  )}
+                </div>
               </div>
-            </>
+            ))
           )}
-        </>
-      )}
-    </div>
+        </div>
+
+        {cartItems.length > 0 && (
+          <footer className="drawer__foot">
+            <div className="drawer__total">
+              <span>Total</span>
+              <b>{money(totalPrice)}</b>
+            </div>
+            <CheckoutButton cartData={cartItems} />
+            <button className="btn btn-danger btn-block" onClick={clearCart}>
+              <Trash2 size={15} /> Vaciar carrito
+            </button>
+          </footer>
+        )}
+      </aside>
+    </>
   );
 };
 

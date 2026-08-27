@@ -1,28 +1,84 @@
+/* ============================================================
+   Cardify — design tokens
+   ============================================================ */
 :root {
-  /* 🎨 Colores base */
-  --color-bg: #141414;
-  --color-surface: #1e1e1e;
-  --color-primary: #95ff00;
-  --color-primary-dark: #350253;
-  --color-primary-light: #bfff4d;
-  --color-text: rgba(255, 255, 255, 0.87);
-  --color-muted: #aaa;
+  /* --- Superficies (dark, con capas de elevación) --- */
+  --bg: #0a0a0e;
+  --bg-1: #101017;
+  --bg-2: #16161f;
+  --bg-3: #1e1e2a;
+  --bg-4: #26263400;
 
-  /* 🖋 Tipografía */
-  --font-base: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  --font-size-base: 1rem;
-  --font-size-title: 2.5rem;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
 
-  /* 🎛️ Espaciados */
-  --spacing-sm: 0.5rem;
-  --spacing-md: 1rem;
-  --spacing-lg: 2rem;
-  --spacing-xl: 4rem;
+  /* --- Texto --- */
+  --text: #f5f5f7;
+  --text-muted: #a2a2b0;
+  --text-dim: #6b6b7a;
 
-  /* 🧱 Bordes */
-  --radius: 8px;
+  /* --- Marca --- */
+  --lime: #a3ff12;
+  --lime-strong: #c9ff64;
+  --lime-dim: rgba(163, 255, 18, 0.14);
+  --violet: #8b5cf6;
+  --violet-deep: #3b1e73;
+  --cyan: #4fe6c8;
 
-  /* 🌟 Sombras */
-  --shadow-primary: 0 0 12px var(--color-primary);
-  --shadow-glow: 0 0 20px var(--color-primary-light);
+  --grad-brand: linear-gradient(135deg, #a3ff12 0%, #4fe6c8 100%);
+  --grad-violet: linear-gradient(135deg, #8b5cf6 0%, #3b1e73 100%);
+  --grad-text: linear-gradient(100deg, #ffffff 0%, #c9ff64 55%, #a3ff12 100%);
+
+  /* --- Semántico --- */
+  --primary: var(--lime);
+  --on-primary: #0a0a0e;
+  --danger: #ff5470;
+  --success: #37e39b;
+  --warning: #ffcc4d;
+
+  /* --- Tipografía --- */
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-display: "Space Grotesk", "Inter", system-ui, sans-serif;
+
+  --fs-display: clamp(2.6rem, 8vw, 4.5rem);
+  --fs-h1: clamp(2rem, 5.5vw, 3rem);
+  --fs-h2: clamp(1.5rem, 4vw, 2.1rem);
+  --fs-h3: clamp(1.15rem, 2.6vw, 1.4rem);
+  --fs-body: 1rem;
+  --fs-sm: 0.875rem;
+  --fs-xs: 0.75rem;
+
+  /* --- Espaciado --- */
+  --s-1: 0.25rem;
+  --s-2: 0.5rem;
+  --s-3: 0.75rem;
+  --s-4: 1rem;
+  --s-5: 1.5rem;
+  --s-6: 2rem;
+  --s-7: 3rem;
+  --s-8: 4rem;
+  --s-9: 6rem;
+
+  /* --- Bordes --- */
+  --r-sm: 10px;
+  --r: 14px;
+  --r-lg: 20px;
+  --r-xl: 28px;
+  --r-full: 999px;
+
+  /* --- Sombras / glows --- */
+  --sh-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --sh-2: 0 10px 30px -12px rgba(0, 0, 0, 0.6);
+  --sh-3: 0 30px 70px -20px rgba(0, 0, 0, 0.7);
+  --glow-lime: 0 10px 40px -10px rgba(163, 255, 18, 0.45);
+  --glow-violet: 0 10px 40px -10px rgba(139, 92, 246, 0.5);
+  --ring: 0 0 0 3px rgba(163, 255, 18, 0.35);
+
+  /* --- Layout --- */
+  --maxw: 1180px;
+  --nav-h: 64px;
+
+  /* --- Movimiento --- */
+  --tr: 180ms cubic-bezier(0.4, 0, 0.2, 1);
+  --tr-slow: 320ms cubic-bezier(0.4, 0, 0.2, 1);
 }

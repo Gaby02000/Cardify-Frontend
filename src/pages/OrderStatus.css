@@ -1,0 +1,63 @@
+.ostatus {
+  flex: 1;
+  min-height: calc(100dvh - var(--nav-h));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--s-6) var(--s-4);
+  position: relative;
+  overflow: hidden;
+}
+.ostatus__blob {
+  position: absolute;
+  width: 26rem;
+  height: 26rem;
+  border-radius: 50%;
+  filter: blur(100px);
+  z-index: 0;
+  animation: float 11s ease-in-out infinite;
+}
+.ostatus--ok .ostatus__blob {
+  background: rgba(55, 227, 155, 0.18);
+}
+.ostatus--fail .ostatus__blob {
+  background: rgba(255, 84, 112, 0.16);
+}
+
+.ostatus__card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+  padding: var(--s-7) var(--s-6);
+  border-radius: var(--r-xl);
+  background: linear-gradient(180deg, var(--bg-2), var(--bg-1));
+  border: 1px solid var(--border);
+  box-shadow: var(--sh-3);
+  animation: fade-up var(--tr-slow) both;
+}
+.ostatus__icon {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  margin: 0 auto var(--s-5);
+  border-radius: var(--r-full);
+}
+.ostatus--ok .ostatus__icon {
+  color: var(--success);
+  background: rgba(55, 227, 155, 0.14);
+}
+.ostatus--fail .ostatus__icon {
+  color: var(--danger);
+  background: rgba(255, 84, 112, 0.14);
+}
+.ostatus__card h1 {
+  font-size: var(--fs-h2);
+}
+.ostatus__card p {
+  margin-top: var(--s-3);
+  margin-bottom: var(--s-6);
+  color: var(--text-muted);
+}

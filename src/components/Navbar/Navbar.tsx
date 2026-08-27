@@ -1,122 +1,114 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // 👈 nuevo import
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Menu, X, ShoppingCart, LogOut, LogIn } from "lucide-react";
 import CartDrawer from "../Cart/CartDrawer";
 import { useUser } from "../../context/UserContext";
+import { useCart } from "../../context/CartContext";
+import "./Navbar.css";
+
+const links = [
+  { href: "#inicio", label: "Inicio" },
+  { href: "#categorias", label: "Categorías" },
+  { href: "#giftcards", label: "Gift Cards" },
+  { href: "#footer", label: "Contacto" },
+];
 
 const Navbar = () => {
   const [cartOpen, setCartOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
-  const navigate = useNavigate(); // 👈 hook de navegación
+  const navigate = useNavigate();
   const { user, logout } = useUser();
+  const { cartItems } = useCart();
 
-  // Detectar tamaño de pantalla en tiempo real
-  useEffect(() => {
-    const handleResize = () => {
-      setIsDesktop(window.innerWidth >= 768);
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  const count = cartItems.reduce((acc, i) => acc + i.quantity, 0);
 
-  const navLinks = (
-    <>
-      <a href="#hero" style={linkStyle}>Home</a>
-      <a href="#categories" style={linkStyle}>Categorías</a>
-      <a href="#giftcards" style={linkStyle}>GiftCards</a>
-      <a href="#footer" style={linkStyle}>Contacto</a>
-    </>
-  );
+  const AuthButton = ({ block = false }: { block?: boolean }) =>
+    user ? (
+      <button
+        className={`btn btn-ghost ${block ? "btn-block" : ""}`}
+        onClick={() => {
+          logout();
+          setMenuOpen(false);
+        }}
+      >
+        <LogOut size={16} /> Salir
+      </button>
+    ) : (
+      <button
+        className={`btn btn-primary ${block ? "btn-block" : ""}`}
+        onClick={() => {
+          navigate("/login");
+          setMenuOpen(false);
+        }}
+      >
+        <LogIn size={16} /> Ingresar
+      </button>
+    );
 
   return (
     <>
-      <nav
-        style={{
-          backgroundColor: "var(--color-surface)",
-          padding: "1rem",
-          borderBottom: "1px solid var(--color-muted)",
-          position: "sticky",
-          top: 0,
-          zIndex: 100,
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-          }}
-        >
-          {/* Logo */}
-          <h2 style={{ color: "var(--color-primary)", fontWeight: "bold", fontSize: "1.5rem" }}>
-            <a href="#hero" style={{ textDecoration: "none", color: "inherit" }}>Cardify</a>
-          </h2>
+      <header className="nav">
+        <div className="container nav__inner">
+          <a href="#inicio" className="nav__brand" aria-label="Cardify inicio">
+            <span className="nav__mark">◆</span>
+            Cardify
+          </a>
 
-          {/* Desktop nav */}
-          {isDesktop && (
-            <div style={{ display: "flex", alignItems: "center", gap: "2rem" }}>
-              <div style={{ display: "flex", gap: "1.5rem" }}>{navLinks}</div>
-              {user ? (
-                <button style={buttonStyle} onClick={logout}>Cerrar sesión</button>
-              ) : (
-                <button style={buttonStyle} onClick={() => navigate("/login")}>Login</button>
-              )}
-              <button style={buttonStyle} onClick={() => setCartOpen(true)}>Mi Carrito 🛒</button>
-            </div>
-          )}
+          <nav className="nav__links">
+            {links.map((l) => (
+              <a key={l.href} href={l.href} className="nav__link">
+                {l.label}
+              </a>
+            ))}
+          </nav>
 
-          {/* Mobile hamburger */}
-          {!isDesktop && (
+          <div className="nav__actions">
             <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              style={{
-                background: "none",
-                border: "none",
-                fontSize: "1.5rem",
-                color: "var(--color-text)",
-                cursor: "pointer",
-              }}
+              className="nav__cart"
+              onClick={() => setCartOpen(true)}
+              aria-label={`Abrir carrito (${count})`}
             >
-              ☰
+              <ShoppingCart size={19} />
+              {count > 0 && <span className="nav__cart-count">{count}</span>}
             </button>
-          )}
+
+            <span className="nav__auth">
+              <AuthButton />
+            </span>
+
+            <button
+              className="nav__burger"
+              onClick={() => setMenuOpen((o) => !o)}
+              aria-label="Menú"
+              aria-expanded={menuOpen}
+            >
+              {menuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </div>
         </div>
 
-        {/* Mobile menu */}
-        {!isDesktop && menuOpen && (
-          <div style={{ marginTop: "1rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
-            {navLinks}
-            {user ? (
-                <button style={buttonStyle} onClick={logout}>Cerrar sesión</button>
-              ) : (
-                <button style={buttonStyle} onClick={() => navigate("/login")}>Login</button>
-            )}
-            <button style={buttonStyle} onClick={() => setCartOpen(true)}>Mi Carrito 🛒</button>
+        {menuOpen && (
+          <div className="nav__menu">
+            <div className="container nav__menu-inner">
+              {links.map((l) => (
+                <a
+                  key={l.href}
+                  href={l.href}
+                  className="nav__link"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {l.label}
+                </a>
+              ))}
+              <AuthButton block />
+            </div>
           </div>
         )}
-      </nav>
+      </header>
 
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
     </>
   );
-};
-
-const linkStyle = {
-  color: "white",
-  textDecoration: "none",
-  fontWeight: "bold",
-  fontSize: "1rem",
-};
-
-const buttonStyle = {
-  padding: "0.5rem 1rem",
-  backgroundColor: "var(--color-primary)",
-  color: "var(--color-bg)",
-  border: "none",
-  borderRadius: "8px",
-  fontWeight: "bold" as const,
-  cursor: "pointer",
 };
 
 export default Navbar;
