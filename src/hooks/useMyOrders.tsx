@@ -14,7 +14,7 @@ export interface MyOrderItem {
 }
 
 export interface MyOrder {
-  id: number;
+  number: number; // correlativo por usuario (1, 2, 3...), no el id real
   status: string;
   total_price: number | string;
   created_at: string;

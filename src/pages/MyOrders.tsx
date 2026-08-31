@@ -55,7 +55,7 @@ const OrderCard = ({ order }: { order: MyOrder }) => {
     <article className="myorders__card">
       <header className="myorders__head">
         <div>
-          <span className="myorders__id">Orden #{order.id}</span>
+          <span className="myorders__id">Orden {order.number}</span>
           <span className="myorders__date">{fmtDate(order.created_at)}</span>
         </div>
         <span className={`myorders__badge myorders__badge--${variant}`}>{label}</span>
@@ -135,7 +135,7 @@ const MyOrders = () => {
         {!loading && !error && orders.length > 0 && (
           <div className="myorders__list">
             {orders.map((o) => (
-              <OrderCard key={o.id} order={o} />
+              <OrderCard key={o.number} order={o} />
             ))}
           </div>
         )}
