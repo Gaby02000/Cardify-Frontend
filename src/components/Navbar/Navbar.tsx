@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Menu, X, ShoppingCart, LogOut, LogIn } from "lucide-react";
+import { Menu, X, ShoppingCart, LogOut, LogIn, Receipt } from "lucide-react";
 import CartDrawer from "../Cart/CartDrawer";
 import PushOptIn from "../PushOptIn";
 import { useUser } from "../../context/UserContext";
@@ -76,6 +76,14 @@ const Navbar = () => {
             </button>
 
             <span className="nav__auth">
+              {user && (
+                <button
+                  className="btn btn-ghost"
+                  onClick={() => navigate("/mis-compras")}
+                >
+                  <Receipt size={16} /> Mis compras
+                </button>
+              )}
               <AuthButton />
             </span>
 
@@ -103,6 +111,17 @@ const Navbar = () => {
                   {l.label}
                 </a>
               ))}
+              {user && (
+                <button
+                  className="btn btn-ghost btn-block"
+                  onClick={() => {
+                    navigate("/mis-compras");
+                    setMenuOpen(false);
+                  }}
+                >
+                  <Receipt size={16} /> Mis compras
+                </button>
+              )}
               <PushOptIn block />
               <AuthButton block />
             </div>

@@ -11,7 +11,7 @@ export default defineConfig({
       // Los iconos ya están generados en /public (npm run generate-pwa-assets).
       includeAssets: ['favicon.ico', 'apple-touch-icon-180x180.png', 'logo.svg'],
       manifest: {
-        name: 'Cardify — Gift cards digitales',
+        name: 'Cardify',
         short_name: 'Cardify',
         description:
           'Gift cards digitales para gamers, techies y amantes del futuro digital.',

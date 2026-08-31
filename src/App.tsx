@@ -5,6 +5,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ConfirmedOrder from "./pages/ConfirmedOrder";
 import FailedOrder from "./pages/FailedOrder";
+import MyOrders from "./pages/MyOrders";
 import Navbar from "./components/Navbar/Navbar";
 import AuthLoader from "./components/AuthLoader";
 
@@ -21,6 +22,7 @@ const AppWrapper = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/order-confirmed" element={<ConfirmedOrder />} />
         <Route path="/order-failed" element={<FailedOrder />} />
+        <Route path="/mis-compras" element={<MyOrders />} />
       </Routes>
     </AuthLoader>
   );

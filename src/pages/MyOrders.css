@@ -1,0 +1,200 @@
+.myorders {
+  min-height: calc(100dvh - var(--nav-h));
+}
+
+.myorders__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  transition: color var(--tr);
+}
+.myorders__back:hover {
+  color: var(--text);
+}
+
+.myorders__title {
+  margin-top: var(--s-4);
+  font-size: var(--fs-h1);
+}
+.myorders__sub {
+  margin-top: var(--s-2);
+  margin-bottom: var(--s-6);
+  color: var(--text-muted);
+}
+
+.myorders__state {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-5);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  background: var(--bg-1);
+}
+.myorders__state--err {
+  color: var(--danger);
+  border-color: rgba(255, 84, 112, 0.3);
+}
+
+.myorders__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-4);
+  padding: var(--s-9) var(--s-4);
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.myorders__list {
+  display: grid;
+  gap: var(--s-4);
+}
+
+.myorders__card {
+  padding: var(--s-5);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: linear-gradient(180deg, var(--bg-2), var(--bg-1));
+}
+
+.myorders__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-3);
+  padding-bottom: var(--s-3);
+  border-bottom: 1px solid var(--border);
+}
+.myorders__id {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+.myorders__date {
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+}
+
+.myorders__badge {
+  flex-shrink: 0;
+  padding: 3px 10px;
+  border-radius: var(--r-full);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+.myorders__badge--ok {
+  color: var(--success);
+  background: rgba(55, 227, 155, 0.12);
+  border-color: rgba(55, 227, 155, 0.3);
+}
+.myorders__badge--wait {
+  color: var(--warning);
+  background: rgba(255, 204, 77, 0.12);
+  border-color: rgba(255, 204, 77, 0.3);
+}
+.myorders__badge--fail {
+  color: var(--danger);
+  background: rgba(255, 84, 112, 0.12);
+  border-color: rgba(255, 84, 112, 0.3);
+}
+.myorders__badge--muted {
+  color: var(--text-muted);
+  background: var(--bg-3);
+  border-color: var(--border);
+}
+
+.myorders__items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  padding: var(--s-4) 0;
+}
+.myorders__items li {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: var(--s-3);
+  align-items: baseline;
+  font-size: var(--fs-sm);
+}
+.myorders__item-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.myorders__item-qty {
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+.myorders__item-price {
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+}
+
+.myorders__codes {
+  padding: var(--s-4) 0;
+  border-top: 1px solid var(--border);
+}
+.myorders__codes ul {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  margin-top: var(--s-2);
+}
+.myorders__codes li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  padding: var(--s-3);
+  border-radius: var(--r);
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+.myorders__code-gc {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.myorders__code {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex-shrink: 0;
+  padding: 0.3rem 0.55rem;
+  border-radius: var(--r-sm);
+  background: var(--lime-dim);
+  color: var(--lime);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--fs-sm);
+}
+.myorders__code:hover {
+  background: rgba(163, 255, 18, 0.22);
+}
+.myorders__code code {
+  font-family: inherit;
+  letter-spacing: 0.02em;
+}
+
+.myorders__foot {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding-top: var(--s-3);
+  border-top: 1px solid var(--border);
+}
+.myorders__foot span {
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+}
+.myorders__foot b {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+}
