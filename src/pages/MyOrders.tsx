@@ -1,11 +1,22 @@
 // src/pages/MyOrders.tsx
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
-import { ArrowLeft, Copy, Check, Package, RefreshCw } from "lucide-react";
+import {
+  ArrowLeft,
+  Copy,
+  Check,
+  Package,
+  RefreshCw,
+  ChevronLeft,
+  ChevronRight,
+  SlidersHorizontal,
+} from "lucide-react";
 import { useUser } from "../context/UserContext";
 import { useMyOrders } from "../hooks/useMyOrders";
 import type { MyOrder } from "../hooks/useMyOrders";
 import "./MyOrders.css";
+
+const PER_PAGE = 10;
 
 const money = (n: number | string) =>
   new Intl.NumberFormat("es-AR", {
@@ -40,6 +51,46 @@ const statusInfo = (status: string): { label: string; variant: Variant } => {
       return { label: "Pendiente", variant: "wait" };
   }
 };
+
+const STATUS_OPTS = [
+  { value: "", label: "Todos los estados" },
+  { value: "pagado", label: "Pagado" },
+  { value: "pendiente", label: "Pendiente" },
+  { value: "rechazado", label: "Rechazado" },
+  { value: "reembolsado", label: "Reembolsado" },
+];
+
+const SORT_OPTS = [
+  { value: "date-desc", label: "Más recientes" },
+  { value: "date-asc", label: "Más antiguas" },
+  { value: "total-desc", label: "Mayor importe" },
+  { value: "total-asc", label: "Menor importe" },
+] as const;
+
+const sortParams = (v: string): { sort: "" | "total"; direction: "asc" | "desc" } => {
+  switch (v) {
+    case "date-asc":
+      return { sort: "", direction: "asc" };
+    case "total-desc":
+      return { sort: "total", direction: "desc" };
+    case "total-asc":
+      return { sort: "total", direction: "asc" };
+    default:
+      return { sort: "", direction: "desc" };
+  }
+};
+
+function pageWindow(current: number, last: number): (number | "dots")[] {
+  if (last <= 7) return Array.from({ length: last }, (_, i) => i + 1);
+  const wanted = new Set([1, last, current, current - 1, current + 1]);
+  const nums = [...wanted].filter((n) => n >= 1 && n <= last).sort((a, b) => a - b);
+  const out: (number | "dots")[] = [];
+  nums.forEach((n, i) => {
+    if (i > 0 && n - nums[i - 1] > 1) out.push("dots");
+    out.push(n);
+  });
+  return out;
+}
 
 const OrderCard = ({ order }: { order: MyOrder }) => {
   const [copied, setCopied] = useState<string | null>(null);
@@ -98,13 +149,55 @@ const OrderCard = ({ order }: { order: MyOrder }) => {
 
 const MyOrders = () => {
   const { user } = useUser();
-  const { orders, loading, error } = useMyOrders();
+
+  const [status, setStatus] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [sortValue, setSortValue] = useState("date-desc");
+  const [page, setPage] = useState(1);
+
+  const { sort, direction } = sortParams(sortValue);
+
+  useEffect(() => {
+    setPage(1);
+  }, [status, dateFrom, dateTo, sortValue]);
+
+  const { orders, meta, loading, error } = useMyOrders({
+    page,
+    perPage: PER_PAGE,
+    status,
+    dateFrom,
+    dateTo,
+    sort,
+    direction,
+  });
+
+  const hasFilters = Boolean(status || dateFrom || dateTo || sortValue !== "date-desc");
+  const firstLoad = loading && orders.length === 0 && !error;
+
+  const clearAll = () => {
+    setStatus("");
+    setDateFrom("");
+    setDateTo("");
+    setSortValue("date-desc");
+  };
+
+  const goto = (p: number) => {
+    if (p < 1 || p > meta.lastPage || p === meta.currentPage) return;
+    setPage(p);
+    document.getElementById("myorders-top")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const pages = useMemo(
+    () => pageWindow(meta.currentPage, meta.lastPage),
+    [meta.currentPage, meta.lastPage]
+  );
 
   if (!user) return <Navigate to="/login" replace />;
 
   return (
     <main className="myorders section">
-      <div className="container">
+      <div className="container" id="myorders-top">
         <Link to="/" className="myorders__back">
           <ArrowLeft size={16} /> Volver a la tienda
         </Link>
@@ -112,32 +205,146 @@ const MyOrders = () => {
         <h1 className="myorders__title">Mis compras</h1>
         <p className="myorders__sub">Tu historial de órdenes y los códigos de cada gift card.</p>
 
-        {loading && (
+        {/* --- Filtros / orden --- */}
+        <div className="myo-toolbar">
+          <select
+            className="myo-select"
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            aria-label="Filtrar por estado"
+          >
+            {STATUS_OPTS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+
+          <label className="myo-date">
+            <span>Desde</span>
+            <input
+              type="date"
+              className="myo-input"
+              value={dateFrom}
+              max={dateTo || undefined}
+              onChange={(e) => setDateFrom(e.target.value)}
+            />
+          </label>
+
+          <label className="myo-date">
+            <span>Hasta</span>
+            <input
+              type="date"
+              className="myo-input"
+              value={dateTo}
+              min={dateFrom || undefined}
+              onChange={(e) => setDateTo(e.target.value)}
+            />
+          </label>
+
+          <select
+            className="myo-select"
+            value={sortValue}
+            onChange={(e) => setSortValue(e.target.value)}
+            aria-label="Ordenar"
+          >
+            {SORT_OPTS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* --- Resumen --- */}
+        <div className="myo-resultbar">
+          <span>
+            {error
+              ? "No se pudieron cargar tus compras."
+              : firstLoad
+              ? "Cargando…"
+              : meta.total === 0
+              ? "Sin resultados"
+              : `Mostrando ${meta.from}–${meta.to} de ${meta.total}`}
+          </span>
+          {hasFilters && (
+            <button className="myo-chip-clear" onClick={clearAll}>
+              <SlidersHorizontal size={14} /> Limpiar filtros
+            </button>
+          )}
+        </div>
+
+        {firstLoad && (
           <div className="myorders__state">
             <span className="spinner" /> Cargando tus compras…
           </div>
         )}
 
-        {!loading && error && (
+        {!firstLoad && error && (
           <div className="myorders__state myorders__state--err">
             <RefreshCw size={18} /> No se pudieron cargar tus compras. Probá de nuevo.
           </div>
         )}
 
-        {!loading && !error && orders.length === 0 && (
+        {!firstLoad && !error && meta.total === 0 && (
           <div className="myorders__empty">
             <Package size={40} strokeWidth={1.5} />
-            <p>Todavía no hiciste ninguna compra.</p>
-            <Link to="/" className="btn btn-primary">Ver gift cards</Link>
+            <p>
+              {hasFilters
+                ? "No hay compras con esos filtros."
+                : "Todavía no hiciste ninguna compra."}
+            </p>
+            <Link to="/" className="btn btn-primary">
+              Ver gift cards
+            </Link>
           </div>
         )}
 
-        {!loading && !error && orders.length > 0 && (
-          <div className="myorders__list">
+        {!error && meta.total > 0 && (
+          <div className={`myorders__list ${loading ? "is-busy" : ""}`}>
             {orders.map((o) => (
               <OrderCard key={o.number} order={o} />
             ))}
           </div>
+        )}
+
+        {!error && meta.lastPage > 1 && (
+          <nav className="myo-pagination" aria-label="Paginación">
+            <button
+              className="myo-page"
+              onClick={() => goto(meta.currentPage - 1)}
+              disabled={meta.currentPage <= 1}
+              aria-label="Página anterior"
+            >
+              <ChevronLeft size={16} />
+            </button>
+
+            {pages.map((p, i) =>
+              p === "dots" ? (
+                <span key={`dots-${i}`} className="myo-page myo-page--dots">
+                  …
+                </span>
+              ) : (
+                <button
+                  key={p}
+                  className={`myo-page ${p === meta.currentPage ? "is-active" : ""}`}
+                  onClick={() => goto(p)}
+                  aria-current={p === meta.currentPage ? "page" : undefined}
+                >
+                  {p}
+                </button>
+              )
+            )}
+
+            <button
+              className="myo-page"
+              onClick={() => goto(meta.currentPage + 1)}
+              disabled={meta.currentPage >= meta.lastPage}
+              aria-label="Página siguiente"
+            >
+              <ChevronRight size={16} />
+            </button>
+          </nav>
         )}
       </div>
     </main>

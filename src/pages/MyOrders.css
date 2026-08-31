@@ -53,6 +53,129 @@
   display: grid;
   gap: var(--s-4);
 }
+.myorders__list.is-busy {
+  opacity: 0.45;
+  pointer-events: none;
+  transition: opacity var(--tr);
+}
+
+/* --- Toolbar de filtros --- */
+.myo-toolbar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-3);
+  margin-bottom: var(--s-4);
+}
+.myo-select,
+.myo-input {
+  width: 100%;
+  min-height: 46px;
+  padding: 0.6rem 0.9rem;
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r);
+  color: var(--text);
+  font-size: var(--fs-sm);
+  transition: border-color var(--tr), box-shadow var(--tr);
+}
+.myo-select {
+  appearance: none;
+  padding-right: 2.2rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b6b7a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.85rem center;
+}
+.myo-select option {
+  background: var(--bg-1);
+  color: var(--text);
+}
+.myo-select:focus,
+.myo-input:focus {
+  outline: none;
+  border-color: var(--lime);
+  box-shadow: 0 0 0 3px var(--lime-dim);
+}
+.myo-date {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.myo-date span {
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+}
+
+.myo-resultbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  margin-bottom: var(--s-4);
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+}
+.myo-chip-clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--lime);
+  font-weight: 600;
+  font-size: var(--fs-sm);
+}
+.myo-chip-clear:hover {
+  text-decoration: underline;
+}
+
+/* --- Paginación --- */
+.myo-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  margin-top: var(--s-7);
+}
+.myo-page {
+  min-width: 42px;
+  height: 42px;
+  padding: 0 0.6rem;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-sm);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  transition: color var(--tr), background var(--tr), border-color var(--tr);
+}
+.myo-page:hover:not(:disabled):not(.is-active) {
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+.myo-page.is-active {
+  color: var(--on-primary);
+  background: var(--lime);
+  border-color: transparent;
+}
+.myo-page:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.myo-page--dots {
+  border: none;
+  background: none;
+  pointer-events: none;
+  color: var(--text-dim);
+}
+
+@media (min-width: 640px) {
+  .myo-toolbar {
+    grid-template-columns: 1.2fr 1fr 1fr 1.2fr;
+    align-items: end;
+  }
+}
 
 .myorders__card {
   padding: var(--s-5);
