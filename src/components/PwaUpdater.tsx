@@ -1,6 +1,6 @@
 // src/components/PwaUpdater.tsx
-// Registra el service worker y avisa (vía toast) cuando la PWA queda lista
-// sin conexión o cuando hay una versión nueva para aplicar.
+// Registra el service worker y aplica automáticamente la versión nueva
+// cuando hay una (avisando con un toast breve).
 import { useEffect } from "react";
 import { useRegisterSW } from "virtual:pwa-register/react";
 import { useToast } from "../context/ToastContext";
@@ -8,7 +8,6 @@ import { useToast } from "../context/ToastContext";
 export default function PwaUpdater() {
   const toast = useToast();
   const {
-    offlineReady: [offlineReady, setOfflineReady],
     needRefresh: [needRefresh],
     updateServiceWorker,
   } = useRegisterSW({
@@ -21,12 +20,6 @@ export default function PwaUpdater() {
       }
     },
   });
-
-  useEffect(() => {
-    if (!offlineReady) return;
-    toast.success("Cardify quedó lista para usarse sin conexión.");
-    setOfflineReady(false);
-  }, [offlineReady, setOfflineReady, toast]);
 
   useEffect(() => {
     if (!needRefresh) return;
