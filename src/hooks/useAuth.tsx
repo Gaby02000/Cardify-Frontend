@@ -2,9 +2,16 @@
 import { useEffect } from "react";
 import { useUser } from "../context/UserContext";
 import api, { getToken, clearToken } from "../lib/api";
+import { syncPushSubscription } from "../lib/push";
 
 export const useAuth = () => {
   const { user, setUser, logout: doLogout } = useUser();
+
+  // Cuando hay usuario (login o sesión ya activa), vinculamos la
+  // suscripción push de este dispositivo a la cuenta.
+  useEffect(() => {
+    if (user) syncPushSubscription();
+  }, [user?.id]);
 
   useEffect(() => {
     const revalidate = async () => {

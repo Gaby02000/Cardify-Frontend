@@ -68,6 +68,29 @@ export async function subscribeToPush(): Promise<void> {
   });
 }
 
+/**
+ * Re-registra la suscripción actual (si existe) para que el backend la
+ * asocie al usuario logueado. Silencioso y best-effort: se llama después
+ * de iniciar sesión para que las push de compra encuentren el dispositivo.
+ */
+export async function syncPushSubscription(): Promise<void> {
+  try {
+    if (!pushSupported() || Notification.permission !== "granted") return;
+    const sub = await getSubscription();
+    if (!sub) return;
+    const json = sub.toJSON();
+    await api.post("/push/subscribe", {
+      endpoint: json.endpoint,
+      keys: json.keys,
+      contentEncoding:
+        (window.PushManager as unknown as { supportedContentEncodings?: string[] })
+          .supportedContentEncodings?.[0] ?? "aes128gcm",
+    });
+  } catch {
+    /* best-effort */
+  }
+}
+
 export async function unsubscribeFromPush(): Promise<void> {
   const sub = await getSubscription();
   if (!sub) return;
