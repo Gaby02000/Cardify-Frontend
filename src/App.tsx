@@ -13,6 +13,7 @@ const FailedOrder = lazy(() => import("./pages/FailedOrder"));
 const MyOrders = lazy(() => import("./pages/MyOrders"));
 const Account = lazy(() => import("./pages/Account"));
 const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
+const CategoryPage = lazy(() => import("./pages/CategoryPage"));
 
 // UI no crítica: banner de cookies + registro del service worker. Se montan
 // después de la carga para no competirle ancho de banda / CPU al primer render.
@@ -72,6 +73,7 @@ const AppWrapper = () => {
       <Suspense fallback={<RouteFallback />}>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/categoria/:id" element={<CategoryPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/order-confirmed" element={<ConfirmedOrder />} />

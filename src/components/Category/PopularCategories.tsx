@@ -1,4 +1,5 @@
 // src/components/Category/PopularCategories.tsx
+import { Link } from "react-router-dom";
 import { Gamepad2, Clapperboard, ShoppingBag, Cpu, Music, Gift } from "lucide-react";
 import type { ComponentType } from "react";
 import { useCategories } from "../../hooks/useCategories";
@@ -33,13 +34,13 @@ const PopularCategories = () => {
       {categories.slice(0, 8).map((cat) => {
         const Icon = iconFor(cat.name);
         return (
-          <a key={cat.id} href="#giftcards" className="cat">
+          <Link key={cat.id} to={`/categoria/${cat.id}`} className="cat">
             <span className="cat__icon">
               <Icon size={22} />
             </span>
             <span className="cat__name">{cat.name}</span>
-            <span className="cat__desc">Tarjetas digitales premium</span>
-          </a>
+            <span className="cat__desc">Ver denominaciones</span>
+          </Link>
         );
       })}
     </div>
