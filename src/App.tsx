@@ -7,6 +7,7 @@ import Register from "./pages/Register";
 import ConfirmedOrder from "./pages/ConfirmedOrder";
 import FailedOrder from "./pages/FailedOrder";
 import MyOrders from "./pages/MyOrders";
+import Account from "./pages/Account";
 import CookiePolicy from "./pages/CookiePolicy";
 import Navbar from "./components/Navbar/Navbar";
 import AuthLoader from "./components/AuthLoader";
@@ -36,6 +37,7 @@ const AppWrapper = () => {
         <Route path="/order-confirmed" element={<ConfirmedOrder />} />
         <Route path="/order-failed" element={<FailedOrder />} />
         <Route path="/mis-compras" element={<MyOrders />} />
+        <Route path="/mi-cuenta" element={<Account />} />
         <Route path="/politica-de-cookies" element={<CookiePolicy />} />
       </Routes>
       <CookieBanner />

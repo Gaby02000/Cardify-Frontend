@@ -1,0 +1,85 @@
+.account {
+  min-height: calc(100dvh - var(--nav-h));
+}
+.account__wrap {
+  max-width: 520px;
+}
+.account__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  transition: color var(--tr);
+}
+.account__back:hover {
+  color: var(--text);
+}
+.account__title {
+  margin-top: var(--s-4);
+  font-size: var(--fs-h1);
+}
+.account__sub {
+  margin-top: var(--s-2);
+  margin-bottom: var(--s-6);
+  color: var(--text-muted);
+}
+
+.account__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  padding: var(--s-6);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, var(--bg-2), var(--bg-1));
+}
+
+.account__error {
+  display: flex;
+  gap: var(--s-2);
+  align-items: flex-start;
+  padding: var(--s-3);
+  border-radius: var(--r);
+  background: rgba(255, 84, 112, 0.1);
+  border: 1px solid rgba(255, 84, 112, 0.3);
+  color: #ffb3c1;
+  font-size: var(--fs-sm);
+  white-space: pre-line;
+}
+
+.account__pwblock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--border);
+}
+.account__pwtitle {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--fs-sm);
+}
+.account__pwtitle span {
+  color: var(--text-dim);
+  font-family: var(--font-sans);
+  font-weight: 400;
+}
+
+.account__pw {
+  position: relative;
+}
+.account__pw .input {
+  padding-right: 2.8rem;
+}
+.account__pw button {
+  position: absolute;
+  right: 0.6rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-dim);
+  padding: 4px;
+}
+.account__pw button:hover {
+  color: var(--text);
+}

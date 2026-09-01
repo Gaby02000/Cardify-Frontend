@@ -1,6 +1,15 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, ShoppingCart, LogOut, LogIn, Receipt } from "lucide-react";
+import {
+  Menu,
+  X,
+  ShoppingCart,
+  LogOut,
+  LogIn,
+  Receipt,
+  UserCog,
+  ChevronDown,
+} from "lucide-react";
 import CartDrawer from "../Cart/CartDrawer";
 import PushOptIn from "../PushOptIn";
 import { useUser } from "../../context/UserContext";
@@ -14,9 +23,19 @@ const links = [
   { href: "#footer", label: "Contacto" },
 ];
 
+const initials = (name: string) =>
+  name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? "")
+    .join("") || "?";
+
 const Navbar = () => {
   const [cartOpen, setCartOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [userMenu, setUserMenu] = useState(false);
+  const userWrapRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const { user, logout } = useUser();
@@ -25,10 +44,29 @@ const Navbar = () => {
   const count = cartItems.reduce((acc, i) => acc + i.quantity, 0);
 
   const onHome = pathname === "/";
-  // En la Home los anclajes hacen scroll; fuera de ella, mandan a la Home
-  // (a la sección correspondiente).
   const linkHref = (hash: string) => (onHome ? hash : `/${hash}`);
   const brandHref = onHome ? "#inicio" : "/";
+
+  // Cerrar el menú de usuario al click afuera o con Escape.
+  useEffect(() => {
+    if (!userMenu) return;
+    const onDown = (e: MouseEvent) => {
+      if (!userWrapRef.current?.contains(e.target as Node)) setUserMenu(false);
+    };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setUserMenu(false);
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [userMenu]);
+
+  const go = (to: string) => {
+    navigate(to);
+    setUserMenu(false);
+    setMenuOpen(false);
+  };
 
   const AuthButton = ({ block = false }: { block?: boolean }) =>
     user ? (
@@ -39,15 +77,12 @@ const Navbar = () => {
           setMenuOpen(false);
         }}
       >
-        <LogOut size={16} /> Salir
+        <LogOut size={16} /> Cerrar sesión
       </button>
     ) : (
       <button
         className={`btn btn-primary ${block ? "btn-block" : ""}`}
-        onClick={() => {
-          navigate("/login");
-          setMenuOpen(false);
-        }}
+        onClick={() => go("/login")}
       >
         <LogIn size={16} /> Ingresar
       </button>
@@ -83,15 +118,59 @@ const Navbar = () => {
             </button>
 
             <span className="nav__auth">
-              {user && (
-                <button
-                  className="btn btn-ghost"
-                  onClick={() => navigate("/mis-compras")}
-                >
-                  <Receipt size={16} /> Mis compras
-                </button>
+              {user ? (
+                <div className="nav__user-wrap" ref={userWrapRef}>
+                  <button
+                    className="nav__user"
+                    onClick={() => setUserMenu((o) => !o)}
+                    aria-haspopup="menu"
+                    aria-expanded={userMenu}
+                  >
+                    <span className="nav__avatar">{initials(user.name)}</span>
+                    <span className="nav__user-name">{user.name}</span>
+                    <ChevronDown
+                      size={15}
+                      className={`nav__user-chev ${userMenu ? "is-open" : ""}`}
+                    />
+                  </button>
+
+                  {userMenu && (
+                    <div className="nav__dropdown" role="menu">
+                      <div className="nav__dropdown-head">
+                        <span className="nav__dropdown-name">{user.name}</span>
+                        <span className="nav__dropdown-email">{user.email}</span>
+                      </div>
+                      <button
+                        className="nav__dropdown-item"
+                        role="menuitem"
+                        onClick={() => go("/mi-cuenta")}
+                      >
+                        <UserCog size={15} /> Mi cuenta
+                      </button>
+                      <button
+                        className="nav__dropdown-item"
+                        role="menuitem"
+                        onClick={() => go("/mis-compras")}
+                      >
+                        <Receipt size={15} /> Mis compras
+                      </button>
+                      <div className="nav__dropdown-sep" />
+                      <button
+                        className="nav__dropdown-item nav__dropdown-item--danger"
+                        role="menuitem"
+                        onClick={() => {
+                          logout();
+                          setUserMenu(false);
+                        }}
+                      >
+                        <LogOut size={15} /> Cerrar sesión
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <AuthButton />
               )}
-              <AuthButton />
             </span>
 
             <button
@@ -118,17 +197,34 @@ const Navbar = () => {
                   {l.label}
                 </a>
               ))}
+
               {user && (
-                <button
-                  className="btn btn-ghost btn-block"
-                  onClick={() => {
-                    navigate("/mis-compras");
-                    setMenuOpen(false);
-                  }}
-                >
-                  <Receipt size={16} /> Mis compras
-                </button>
+                <div className="nav__menu-user">
+                  <span className="nav__avatar">{initials(user.name)}</span>
+                  <span className="nav__menu-user-info">
+                    <b>{user.name}</b>
+                    <small>{user.email}</small>
+                  </span>
+                </div>
               )}
+
+              {user && (
+                <>
+                  <button
+                    className="btn btn-ghost btn-block"
+                    onClick={() => go("/mi-cuenta")}
+                  >
+                    <UserCog size={16} /> Mi cuenta
+                  </button>
+                  <button
+                    className="btn btn-ghost btn-block"
+                    onClick={() => go("/mis-compras")}
+                  >
+                    <Receipt size={16} /> Mis compras
+                  </button>
+                </>
+              )}
+
               <PushOptIn block />
               <AuthButton block />
             </div>
