@@ -1,5 +1,8 @@
 // src/hooks/useMyOrders.tsx
-import { useEffect, useState } from "react";
+// Trae TODO el historial de compras del usuario una sola vez y lo guarda en
+// localStorage. El filtrado / orden / paginación se hace en memoria en la
+// página, así se puede manipular sin conexión sin pegarle a la red.
+import { useCallback, useEffect, useState } from "react";
 import api from "../lib/api";
 
 export interface MyOrderCode {
@@ -22,88 +25,98 @@ export interface MyOrder {
   items: MyOrderItem[];
 }
 
-export interface MyOrdersQuery {
-  page?: number;
-  perPage?: number;
-  status?: string; // "" = todos
-  dateFrom?: string; // yyyy-mm-dd
-  dateTo?: string; // yyyy-mm-dd
-  sort?: "" | "total"; // "" = fecha
-  direction?: "asc" | "desc";
+export const ORDERS_CACHE_KEY = "my-orders";
+
+type CacheShape = { userId: number; savedAt: string; orders: MyOrder[] };
+
+function readCache(userId?: number): MyOrder[] | null {
+  if (!userId) return null;
+  try {
+    const raw = localStorage.getItem(ORDERS_CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as CacheShape;
+    if (!parsed || parsed.userId !== userId || !Array.isArray(parsed.orders)) {
+      return null;
+    }
+    return parsed.orders;
+  } catch {
+    return null;
+  }
 }
 
-export interface MyOrdersMeta {
-  currentPage: number;
-  lastPage: number;
-  total: number;
-  from: number;
-  to: number;
+function writeCache(userId: number, orders: MyOrder[]) {
+  try {
+    const payload: CacheShape = {
+      userId,
+      savedAt: new Date().toISOString(),
+      orders,
+    };
+    localStorage.setItem(ORDERS_CACHE_KEY, JSON.stringify(payload));
+  } catch {
+    /* storage lleno / bloqueado: seguimos solo en memoria */
+  }
 }
 
-const EMPTY_META: MyOrdersMeta = {
-  currentPage: 1,
-  lastPage: 1,
-  total: 0,
-  from: 0,
-  to: 0,
-};
+export function clearOrdersCache() {
+  try {
+    localStorage.removeItem(ORDERS_CACHE_KEY);
+  } catch {
+    /* noop */
+  }
+}
 
-export function useMyOrders(query: MyOrdersQuery = {}) {
-  const {
-    page = 1,
-    perPage = 10,
-    status = "",
-    dateFrom = "",
-    dateTo = "",
-    sort = "",
-    direction = "desc",
-  } = query;
-
-  const [orders, setOrders] = useState<MyOrder[]>([]);
-  const [meta, setMeta] = useState<MyOrdersMeta>(EMPTY_META);
+export function useMyOrders(userId?: number) {
+  const [orders, setOrders] = useState<MyOrder[]>(() => readCache(userId) ?? []);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [fromCache, setFromCache] = useState(false);
+
+  const load = useCallback(
+    async (signal?: AbortSignal) => {
+      if (!userId) return;
+      setLoading(true);
+      setError(false);
+
+      try {
+        const all: MyOrder[] = [];
+        let page = 1;
+        let lastPage = 1;
+
+        do {
+          const { data } = await api.get(`/orders`, {
+            params: { per_page: 1000, page },
+            signal,
+          });
+          all.push(...((data?.data ?? []) as MyOrder[]));
+          lastPage = data?.last_page ?? 1;
+          page += 1;
+        } while (page <= lastPage);
+
+        setOrders(all);
+        setFromCache(false);
+        writeCache(userId, all);
+      } catch (err: unknown) {
+        if ((err as { code?: string })?.code === "ERR_CANCELED") return;
+        const cached = readCache(userId);
+        if (cached) {
+          setOrders(cached);
+          setFromCache(true);
+        } else {
+          setError(true);
+          setOrders([]);
+        }
+      } finally {
+        if (!signal?.aborted) setLoading(false);
+      }
+    },
+    [userId]
+  );
 
   useEffect(() => {
-    const params = new URLSearchParams();
-    params.set("page", String(page));
-    params.set("per_page", String(perPage));
-    if (status) params.set("status", status);
-    if (dateFrom) params.set("date_from", dateFrom);
-    if (dateTo) params.set("date_to", dateTo);
-    if (sort) params.set("sort", sort);
-    params.set("direction", direction);
-
     const ctrl = new AbortController();
-    setLoading(true);
-    setError(false);
-
-    api
-      .get(`/orders?${params.toString()}`, { signal: ctrl.signal })
-      .then((res) => {
-        const d = res.data ?? {};
-        setOrders(d.data ?? []);
-        setMeta({
-          currentPage: d.current_page ?? 1,
-          lastPage: d.last_page ?? 1,
-          total: d.total ?? 0,
-          from: d.from ?? 0,
-          to: d.to ?? 0,
-        });
-      })
-      .catch((err) => {
-        if (err?.code === "ERR_CANCELED") return;
-        console.error("No se pudieron cargar las compras", err);
-        setError(true);
-        setOrders([]);
-        setMeta(EMPTY_META);
-      })
-      .finally(() => {
-        if (!ctrl.signal.aborted) setLoading(false);
-      });
-
+    load(ctrl.signal);
     return () => ctrl.abort();
-  }, [page, perPage, status, dateFrom, dateTo, sort, direction]);
+  }, [load]);
 
-  return { orders, meta, loading, error };
+  return { orders, loading, error, fromCache, refetch: () => load() };
 }

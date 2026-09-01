@@ -33,10 +33,15 @@ export const setCachedUser = (user: unknown) =>
   localStorage.setItem(USER_KEY, JSON.stringify(user));
 export const clearCachedUser = () => localStorage.removeItem(USER_KEY);
 
-/** Borra toda la sesión local (token + usuario cacheado). */
+/** Borra toda la sesión local (token + usuario cacheado + historial de compras). */
 export const clearSession = () => {
   clearToken();
   clearCachedUser();
+  try {
+    localStorage.removeItem("my-orders");
+  } catch {
+    /* noop */
+  }
 };
 
 const baseURL = (import.meta.env.VITE_API_URL ?? "").trim();

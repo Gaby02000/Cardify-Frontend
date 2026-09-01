@@ -60,6 +60,14 @@ const STATUS_OPTS = [
   { value: "reembolsado", label: "Reembolsado" },
 ];
 
+// Agrupa las variantes históricas de estado bajo el valor canónico del filtro.
+const STATUS_GROUPS: Record<string, string[]> = {
+  pagado: ["pagado", "completed", "shipped", "authorized"],
+  pendiente: ["pendiente", "pending", "processing", "in_process"],
+  rechazado: ["rechazado", "rejected", "cancelled"],
+  reembolsado: ["reembolsado", "refunded", "charged_back"],
+};
+
 const SORT_OPTS = [
   { value: "date-desc", label: "Más recientes" },
   { value: "date-asc", label: "Más antiguas" },
@@ -159,22 +167,43 @@ const MyOrders = () => {
 
   const { sort, direction } = sortParams(sortValue);
 
+  // Se trae TODO el historial una vez (o del cache); a partir de acá se
+  // filtra, ordena y pagina en memoria, sin más pedidos a la red.
+  const { orders: allOrders, loading, error, fromCache } = useMyOrders(user?.id);
+
   useEffect(() => {
     setPage(1);
   }, [status, dateFrom, dateTo, sortValue]);
 
-  const { orders, meta, loading, error } = useMyOrders({
-    page,
-    perPage: PER_PAGE,
-    status,
-    dateFrom,
-    dateTo,
-    sort,
-    direction,
-  });
+  const filtered = useMemo(() => {
+    let list = allOrders;
+
+    if (status) {
+      const group = STATUS_GROUPS[status] ?? [status];
+      list = list.filter((o) => group.includes(o.status));
+    }
+    if (dateFrom) list = list.filter((o) => o.created_at.slice(0, 10) >= dateFrom);
+    if (dateTo) list = list.filter((o) => o.created_at.slice(0, 10) <= dateTo);
+
+    const dir = direction === "asc" ? 1 : -1;
+    return [...list].sort((a, b) => {
+      const diff =
+        sort === "total"
+          ? Number(a.total_price) - Number(b.total_price)
+          : new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      return diff * dir || (a.number - b.number) * dir;
+    });
+  }, [allOrders, status, dateFrom, dateTo, sort, direction]);
+
+  const total = filtered.length;
+  const lastPage = Math.max(1, Math.ceil(total / PER_PAGE));
+  const currentPage = Math.min(page, lastPage);
+  const from = total === 0 ? 0 : (currentPage - 1) * PER_PAGE + 1;
+  const to = Math.min(currentPage * PER_PAGE, total);
+  const pageItems = filtered.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE);
 
   const hasFilters = Boolean(status || dateFrom || dateTo || sortValue !== "date-desc");
-  const firstLoad = loading && orders.length === 0 && !error;
+  const firstLoad = loading && allOrders.length === 0 && !error;
 
   const clearAll = () => {
     setStatus("");
@@ -184,14 +213,14 @@ const MyOrders = () => {
   };
 
   const goto = (p: number) => {
-    if (p < 1 || p > meta.lastPage || p === meta.currentPage) return;
+    if (p < 1 || p > lastPage || p === currentPage) return;
     setPage(p);
     document.getElementById("myorders-top")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const pages = useMemo(
-    () => pageWindow(meta.currentPage, meta.lastPage),
-    [meta.currentPage, meta.lastPage]
+    () => pageWindow(currentPage, lastPage),
+    [currentPage, lastPage]
   );
 
   if (!user) return <Navigate to="/login" replace />;
@@ -257,18 +286,25 @@ const MyOrders = () => {
           </select>
         </div>
 
+        {fromCache && !error && (
+          <p className="myo-cache-note">
+            Mostrando datos guardados en este dispositivo; pueden estar
+            desactualizados.
+          </p>
+        )}
+
         {/* --- Resumen --- */}
         <div className="myo-resultbar">
           <span>
             {error
               ? offline
-                ? "Sin conexión y no tenemos esta vista guardada."
+                ? "Sin conexión y todavía no guardamos tus compras."
                 : "No se pudieron cargar tus compras."
               : firstLoad
               ? "Cargando…"
-              : meta.total === 0
+              : total === 0
               ? "Sin resultados"
-              : `Mostrando ${meta.from}–${meta.to} de ${meta.total}`}
+              : `Mostrando ${from}–${to} de ${total}`}
           </span>
           {hasFilters && (
             <button className="myo-chip-clear" onClick={clearAll}>
@@ -287,12 +323,12 @@ const MyOrders = () => {
           <div className="myorders__state myorders__state--err">
             <RefreshCw size={18} />{" "}
             {offline
-              ? "Estás sin conexión y no hay una copia guardada de esta lista. Reconectá o probá con menos filtros."
+              ? "Estás sin conexión y todavía no abriste tus compras estando conectado, así que no hay nada guardado."
               : "No se pudieron cargar tus compras. Probá de nuevo."}
           </div>
         )}
 
-        {!firstLoad && !error && meta.total === 0 && (
+        {!firstLoad && !error && total === 0 && (
           <div className="myorders__empty">
             <Package size={40} strokeWidth={1.5} />
             <p>
@@ -306,20 +342,20 @@ const MyOrders = () => {
           </div>
         )}
 
-        {!error && meta.total > 0 && (
-          <div className={`myorders__list ${loading ? "is-busy" : ""}`}>
-            {orders.map((o) => (
+        {!error && total > 0 && (
+          <div className="myorders__list">
+            {pageItems.map((o) => (
               <OrderCard key={o.number} order={o} />
             ))}
           </div>
         )}
 
-        {!error && meta.lastPage > 1 && (
+        {!error && lastPage > 1 && (
           <nav className="myo-pagination" aria-label="Paginación">
             <button
               className="myo-page"
-              onClick={() => goto(meta.currentPage - 1)}
-              disabled={meta.currentPage <= 1}
+              onClick={() => goto(currentPage - 1)}
+              disabled={currentPage <= 1}
               aria-label="Página anterior"
             >
               <ChevronLeft size={16} />
@@ -333,9 +369,9 @@ const MyOrders = () => {
               ) : (
                 <button
                   key={p}
-                  className={`myo-page ${p === meta.currentPage ? "is-active" : ""}`}
+                  className={`myo-page ${p === currentPage ? "is-active" : ""}`}
                   onClick={() => goto(p)}
-                  aria-current={p === meta.currentPage ? "page" : undefined}
+                  aria-current={p === currentPage ? "page" : undefined}
                 >
                   {p}
                 </button>
@@ -344,8 +380,8 @@ const MyOrders = () => {
 
             <button
               className="myo-page"
-              onClick={() => goto(meta.currentPage + 1)}
-              disabled={meta.currentPage >= meta.lastPage}
+              onClick={() => goto(currentPage + 1)}
+              disabled={currentPage >= lastPage}
               aria-label="Página siguiente"
             >
               <ChevronRight size={16} />
