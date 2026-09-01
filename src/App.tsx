@@ -1,4 +1,5 @@
 // src/App.tsx
+import { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -11,12 +12,22 @@ import Navbar from "./components/Navbar/Navbar";
 import AuthLoader from "./components/AuthLoader";
 import CookieBanner from "./components/CookieBanner/CookieBanner";
 
+// Al cambiar de ruta (sin hash), volvemos arriba de todo.
+const ScrollToTop = () => {
+  const { pathname, hash } = useLocation();
+  useEffect(() => {
+    if (!hash) window.scrollTo(0, 0);
+  }, [pathname, hash]);
+  return null;
+};
+
 const AppWrapper = () => {
   const location = useLocation();
   const hideNavbarRoutes = ["/login", "/register"];
 
   return (
     <AuthLoader>
+      <ScrollToTop />
       {!hideNavbarRoutes.includes(location.pathname) && <Navbar />}
       <Routes>
         <Route path="/" element={<Home />} />

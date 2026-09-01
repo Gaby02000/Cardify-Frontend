@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, ShoppingCart, LogOut, LogIn, Receipt } from "lucide-react";
 import CartDrawer from "../Cart/CartDrawer";
 import PushOptIn from "../PushOptIn";
@@ -18,10 +18,17 @@ const Navbar = () => {
   const [cartOpen, setCartOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const { user, logout } = useUser();
   const { cartItems } = useCart();
 
   const count = cartItems.reduce((acc, i) => acc + i.quantity, 0);
+
+  const onHome = pathname === "/";
+  // En la Home los anclajes hacen scroll; fuera de ella, mandan a la Home
+  // (a la sección correspondiente).
+  const linkHref = (hash: string) => (onHome ? hash : `/${hash}`);
+  const brandHref = onHome ? "#inicio" : "/";
 
   const AuthButton = ({ block = false }: { block?: boolean }) =>
     user ? (
@@ -50,14 +57,14 @@ const Navbar = () => {
     <>
       <header className="nav">
         <div className="container nav__inner">
-          <a href="#inicio" className="nav__brand" aria-label="Cardify inicio">
+          <a href={brandHref} className="nav__brand" aria-label="Cardify inicio">
             <span className="nav__mark">◆</span>
             Cardify
           </a>
 
           <nav className="nav__links">
             {links.map((l) => (
-              <a key={l.href} href={l.href} className="nav__link">
+              <a key={l.href} href={linkHref(l.href)} className="nav__link">
                 {l.label}
               </a>
             ))}
@@ -104,7 +111,7 @@ const Navbar = () => {
               {links.map((l) => (
                 <a
                   key={l.href}
-                  href={l.href}
+                  href={linkHref(l.href)}
                   className="nav__link"
                   onClick={() => setMenuOpen(false)}
                 >
