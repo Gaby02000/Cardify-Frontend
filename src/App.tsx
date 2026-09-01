@@ -1,10 +1,9 @@
 // src/App.tsx
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import Home from "./pages/Home";
 import Navbar from "./components/Navbar/Navbar";
 import AuthLoader from "./components/AuthLoader";
-import CookieBanner from "./components/CookieBanner/CookieBanner";
 
 // Rutas secundarias: se cargan cuando se visitan (menos JS en la primera carga).
 const Login = lazy(() => import("./pages/Login"));
@@ -14,6 +13,11 @@ const FailedOrder = lazy(() => import("./pages/FailedOrder"));
 const MyOrders = lazy(() => import("./pages/MyOrders"));
 const Account = lazy(() => import("./pages/Account"));
 const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
+
+// UI no crítica: banner de cookies + registro del service worker. Se montan
+// después de la carga para no competirle ancho de banda / CPU al primer render.
+const CookieBanner = lazy(() => import("./components/CookieBanner/CookieBanner"));
+const PwaUpdater = lazy(() => import("./components/PwaUpdater"));
 
 const RouteFallback = () => (
   <div className="route-fallback">
@@ -28,6 +32,33 @@ const ScrollToTop = () => {
     if (!hash) window.scrollTo(0, 0);
   }, [pathname, hash]);
   return null;
+};
+
+const DeferredUI = () => {
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    let t: ReturnType<typeof setTimeout>;
+    const arm = () => {
+      t = setTimeout(() => setShow(true), 1200);
+    };
+    if (document.readyState === "complete") {
+      arm();
+    } else {
+      window.addEventListener("load", arm, { once: true });
+    }
+    return () => {
+      clearTimeout(t);
+      window.removeEventListener("load", arm);
+    };
+  }, []);
+
+  if (!show) return null;
+  return (
+    <Suspense fallback={null}>
+      <PwaUpdater />
+      <CookieBanner />
+    </Suspense>
+  );
 };
 
 const AppWrapper = () => {
@@ -50,7 +81,7 @@ const AppWrapper = () => {
           <Route path="/politica-de-cookies" element={<CookiePolicy />} />
         </Routes>
       </Suspense>
-      <CookieBanner />
+      <DeferredUI />
     </AuthLoader>
   );
 };

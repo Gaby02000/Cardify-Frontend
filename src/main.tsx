@@ -3,6 +3,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.tsx";
+// El SW y el banner de cookies se montan diferidos desde App (DeferredUI).
 
 // Preconnect al backend para acortar la primera carga de datos.
 try {
@@ -18,7 +19,6 @@ try {
   /* VITE_API_URL vacío o inválido: no pasa nada */
 }
 
-import PwaUpdater from "./components/PwaUpdater";
 import { ToastProvider } from "./context/ToastContext";
 import { ConfirmProvider } from "./context/ConfirmContext";
 import { UserProvider } from "./context/UserContext";
@@ -28,7 +28,6 @@ import { CookieConsentProvider } from "./context/CookieConsentContext";
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ToastProvider>
-      <PwaUpdater />
       <CookieConsentProvider>
         <ConfirmProvider>
           <UserProvider>
