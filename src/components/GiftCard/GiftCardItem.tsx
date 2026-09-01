@@ -28,6 +28,10 @@ const GiftcardItem: React.FC<Props> = ({ giftcard }) => {
   const lowStock = giftcard.stock > 0 && giftcard.stock <= 5;
   const outOfStock = giftcard.stock <= 0;
 
+  const listPrice = Number(giftcard.price);
+  const finalPrice = Number(giftcard.final_price ?? giftcard.price);
+  const hasDiscount = Boolean(giftcard.has_discount) && finalPrice < listPrice;
+
   return (
     <article className={`gc ${flipped ? "is-flipped" : ""}`}>
       <div className="gc__flipper">
@@ -36,6 +40,9 @@ const GiftcardItem: React.FC<Props> = ({ giftcard }) => {
           <div className="gc__media">
             {giftcard.category?.name && (
               <span className="badge badge-lime gc__chip">{giftcard.category.name}</span>
+            )}
+            {hasDiscount && (
+              <span className="gc__off">-{giftcard.discount_percent}%</span>
             )}
             <button
               className="gc__info"
@@ -58,7 +65,10 @@ const GiftcardItem: React.FC<Props> = ({ giftcard }) => {
             <h3 className="gc__title">{giftcard.title}</h3>
 
             <div className="gc__meta">
-              <span className="gc__price">{money(giftcard.price)}</span>
+              <span className="gc__price">
+                {money(finalPrice)}
+                {hasDiscount && <s className="gc__price-old">{money(listPrice)}</s>}
+              </span>
               {giftcard.amount && (
                 <span className="gc__balance">Saldo {money(Number(giftcard.amount))}</span>
               )}
@@ -79,7 +89,7 @@ const GiftcardItem: React.FC<Props> = ({ giftcard }) => {
                 addToCart({
                   giftcardId: giftcard.id,
                   title: giftcard.title,
-                  price: giftcard.price,
+                  price: finalPrice,
                   quantity: 1,
                   image: giftcard.image,
                 })
@@ -95,7 +105,8 @@ const GiftcardItem: React.FC<Props> = ({ giftcard }) => {
           <h3>{giftcard.title}</h3>
           <p>{giftcard.description || "Sin descripción disponible."}</p>
           <p>
-            <strong>{money(giftcard.price)}</strong>
+            <strong>{money(finalPrice)}</strong>
+            {hasDiscount && ` · antes ${money(listPrice)}`}
             {giftcard.amount && ` · saldo ${money(Number(giftcard.amount))}`}
           </p>
           <button className="btn btn-ghost" onClick={() => setFlipped(false)}>

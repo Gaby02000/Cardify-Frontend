@@ -13,6 +13,9 @@ export interface GiftCard {
   description: string;
   amount: string;
   price: number;
+  discount_percent: number | null;
+  has_discount: boolean;
+  final_price: string;
   image: string;
   stock: number;
   created_at: string;

@@ -123,7 +123,12 @@ const CartDrawer = ({ open, onClose }: Props) => {
 
                   <div className="drawer__info">
                     <h4>{item.title}</h4>
-                    <small>{money(item.price)} c/u</small>
+                    <small>
+                      {item.originalPrice && (
+                        <s className="drawer__old">{money(item.originalPrice)}</s>
+                      )}
+                      {money(item.price)} c/u
+                    </small>
 
                     {item.id != null && (
                       <div className="drawer__qty">

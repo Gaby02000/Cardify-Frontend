@@ -32,6 +32,10 @@ const money = (n: number | string) =>
     maximumFractionDigits: 2,
   }).format(Number(n));
 
+const priceOf = (g: GiftCard) => Number(g.final_price ?? g.price);
+const isOff = (g: GiftCard) =>
+  Boolean(g.has_discount) && priceOf(g) < Number(g.price);
+
 const CategoryPage = () => {
   const { id } = useParams();
   const { categories, loading: catsLoading } = useCategories();
@@ -47,7 +51,7 @@ const CategoryPage = () => {
     () =>
       giftcards
         .filter((g) => String(g.id_category) === id)
-        .sort((a, b) => Number(a.price) - Number(b.price)),
+        .sort((a, b) => priceOf(a) - priceOf(b)),
     [giftcards, id]
   );
 
@@ -83,7 +87,7 @@ const CategoryPage = () => {
     addToCart({
       giftcardId: selected.id,
       title: selected.title,
-      price: Number(selected.price),
+      price: priceOf(selected),
       quantity: qty,
       image: selected.image,
       stock: selected.stock,
@@ -159,10 +163,22 @@ const CategoryPage = () => {
                       >
                         <span className="catp__opt-name">
                           {o.title}
+                          {isOff(o) && (
+                            <em className="catp__opt-off">-{o.discount_percent}%</em>
+                          )}
                           {active && <Check size={13} />}
                         </span>
                         <span className="catp__opt-price">
-                          {soldout ? "Sin stock" : money(o.price)}
+                          {soldout ? (
+                            "Sin stock"
+                          ) : (
+                            <>
+                              {money(priceOf(o))}
+                              {isOff(o) && (
+                                <s className="catp__opt-old">{money(o.price)}</s>
+                              )}
+                            </>
+                          )}
                         </span>
                       </button>
                     );
@@ -173,7 +189,12 @@ const CategoryPage = () => {
                   <div className="catp__buy">
                     <div className="catp__price">
                       <span className="catp__price-label">Precio</span>
-                      <b>{money(selected.price)}</b>
+                      <b>
+                        {money(priceOf(selected))}
+                        {isOff(selected) && (
+                          <s className="catp__price-old">{money(selected.price)}</s>
+                        )}
+                      </b>
                       <span className="catp__price-note">
                         Impuestos incluidos · {selected.title}
                       </span>

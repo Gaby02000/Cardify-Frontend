@@ -112,6 +112,20 @@
 .catp__opt.is-active .catp__opt-price {
   color: var(--lime-strong);
 }
+.catp__opt-old {
+  margin-left: 6px;
+  font-size: 0.82em;
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+.catp__opt-off {
+  margin-left: 6px;
+  font-style: normal;
+  font-size: 0.72em;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--lime-strong);
+}
 
 .catp__opt-sk {
   height: 54px;
@@ -138,6 +152,13 @@
   font-family: var(--font-display);
   font-size: clamp(1.6rem, 5vw, 2rem);
   color: var(--text);
+}
+.catp__price-old {
+  margin-left: 10px;
+  font-size: 0.55em;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-decoration: line-through;
 }
 .catp__price-note {
   font-size: var(--fs-xs);

@@ -8,6 +8,7 @@ export interface GiftcardCartItem {
   giftcardId: number;
   title: string;
   price: number;
+  originalPrice?: number;
   quantity: number;
   image?: string;
   stock?: number;
@@ -16,15 +17,21 @@ export interface GiftcardCartItem {
 const CART_STORAGE_KEY = "cart";
 
 const mapBackendItems = (cart: any): GiftcardCartItem[] =>
-  cart?.cart_items?.map((item: any) => ({
-    id: item.id,
-    giftcardId: item.gift_card_id,
-    title: item.gift_card?.title,
-    price: Number(item.gift_card?.price),
-    image: item.gift_card?.image,
-    quantity: item.quantity,
-    stock: item.gift_card?.stock,
-  })) ?? [];
+  cart?.cart_items?.map((item: any) => {
+    const gc = item.gift_card ?? {};
+    const listPrice = Number(gc.price);
+    const finalPrice = Number(gc.final_price ?? gc.price);
+    return {
+      id: item.id,
+      giftcardId: item.gift_card_id,
+      title: gc.title,
+      price: finalPrice,
+      originalPrice: gc.has_discount && finalPrice < listPrice ? listPrice : undefined,
+      image: gc.image,
+      quantity: item.quantity,
+      stock: gc.stock,
+    };
+  }) ?? [];
 
 export const useCart = () => {
   const toast = useToast();
