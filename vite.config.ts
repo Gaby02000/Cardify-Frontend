@@ -51,11 +51,17 @@ export default defineConfig({
         navigateFallbackDenylist: [/^\/apis\//, /^\/api\//, /^\/admin/],
         cleanupOutdatedCaches: true,
         clientsClaim: true,
+        // El bundle completo entra al precache (subimos el límite por las dudas).
+        maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-            handler: 'StaleWhileRevalidate',
-            options: { cacheName: 'google-fonts-stylesheets' },
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'google-fonts-stylesheets',
+              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
           },
           {
             urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
@@ -67,23 +73,49 @@ export default defineConfig({
             },
           },
           {
-            // Catálogo público (solo GET). Regex absoluta => vale para cualquier host del backend.
+            // Catálogo público (giftcards + categorías). Guarda bastantes páginas
+            // y combinaciones de filtros para poder navegarlas sin conexión.
             urlPattern: /^https?:\/\/[^/]+\/apis\/(?:gift-?cards|categories)\b/i,
             handler: 'NetworkFirst',
             options: {
               cacheName: 'cardify-catalogo',
               networkTimeoutSeconds: 4,
-              expiration: { maxEntries: 80, maxAgeSeconds: 60 * 60 * 24 },
+              expiration: { maxEntries: 250, maxAgeSeconds: 60 * 60 * 24 * 7 },
+              cacheableResponse: { statuses: [0, 200] },
+              matchOptions: { ignoreVary: true },
+            },
+          },
+          {
+            // Resto de la API del mismo backend (carrito, "mis compras", usuario…).
+            // Solo GET. Online siempre pide a la red; sin conexión sirve lo último
+            // que se haya visto de esa misma URL.
+            urlPattern: /^https?:\/\/[^/]+\/apis\/.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'cardify-api',
+              networkTimeoutSeconds: 3,
+              expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 7 },
+              cacheableResponse: { statuses: [0, 200] },
+              matchOptions: { ignoreVary: true },
+            },
+          },
+          {
+            // Imágenes servidas por Cloudinary.
+            urlPattern: /^https:\/\/res\.cloudinary\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'cardify-cloudinary',
+              expiration: { maxEntries: 250, maxAgeSeconds: 60 * 60 * 24 * 30 },
               cacheableResponse: { statuses: [0, 200] },
             },
           },
           {
-            // Imágenes de producto (backend estático / Cloudinary).
+            // Otras imágenes (backend estático, etc.).
             urlPattern: /^https?:\/\/[^/]+\/.*\.(?:png|jpe?g|gif|svg|webp|avif)(?:\?.*)?$/i,
             handler: 'StaleWhileRevalidate',
             options: {
               cacheName: 'cardify-imagenes',
-              expiration: { maxEntries: 120, maxAgeSeconds: 60 * 60 * 24 * 30 },
+              expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 30 },
               cacheableResponse: { statuses: [0, 200] },
             },
           },

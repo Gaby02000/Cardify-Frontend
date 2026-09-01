@@ -53,6 +53,7 @@ function pageWindow(current: number, last: number): (number | "dots")[] {
 
 const GiftcardList = () => {
   const { categories } = useCategories();
+  const offline = typeof navigator !== "undefined" && !navigator.onLine;
 
   const [searchInput, setSearchInput] = useState("");
   const search = useDebounced(searchInput);
@@ -154,7 +155,9 @@ const GiftcardList = () => {
       <div className="gc-resultbar">
         <span>
           {error
-            ? "No se pudieron cargar las gift cards."
+            ? offline
+              ? "Sin conexión y no hay resultados guardados para esta búsqueda."
+              : "No se pudieron cargar las gift cards."
             : firstLoad
             ? "Cargando…"
             : meta.total === 0
@@ -178,7 +181,9 @@ const GiftcardList = () => {
       ) : error || meta.total === 0 ? (
         <p className="gc-empty">
           {error
-            ? "Hubo un problema al cargar las gift cards. Probá de nuevo."
+            ? offline
+              ? "Estás sin conexión y todavía no se guardó ninguna gift card. Reconectá para verlas."
+              : "Hubo un problema al cargar las gift cards. Probá de nuevo."
             : "No encontramos gift cards con esos filtros."}
         </p>
       ) : (

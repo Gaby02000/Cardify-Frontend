@@ -149,6 +149,7 @@ const OrderCard = ({ order }: { order: MyOrder }) => {
 
 const MyOrders = () => {
   const { user } = useUser();
+  const offline = typeof navigator !== "undefined" && !navigator.onLine;
 
   const [status, setStatus] = useState("");
   const [dateFrom, setDateFrom] = useState("");
@@ -260,7 +261,9 @@ const MyOrders = () => {
         <div className="myo-resultbar">
           <span>
             {error
-              ? "No se pudieron cargar tus compras."
+              ? offline
+                ? "Sin conexión y no tenemos esta vista guardada."
+                : "No se pudieron cargar tus compras."
               : firstLoad
               ? "Cargando…"
               : meta.total === 0
@@ -282,7 +285,10 @@ const MyOrders = () => {
 
         {!firstLoad && error && (
           <div className="myorders__state myorders__state--err">
-            <RefreshCw size={18} /> No se pudieron cargar tus compras. Probá de nuevo.
+            <RefreshCw size={18} />{" "}
+            {offline
+              ? "Estás sin conexión y no hay una copia guardada de esta lista. Reconectá o probá con menos filtros."
+              : "No se pudieron cargar tus compras. Probá de nuevo."}
           </div>
         )}
 
