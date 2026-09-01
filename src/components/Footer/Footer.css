@@ -72,10 +72,29 @@
 .ft__bottom {
   border-top: 1px solid var(--border);
   padding-block: var(--s-5);
-  text-align: center;
   font-size: var(--fs-xs);
   color: var(--text-dim);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2) var(--s-4);
 }
+.ft__legal {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--s-2) var(--s-4);
+}
+.ft__legal a,
+.ft__legal button {
+  color: var(--text-muted);
+  transition: color var(--tr);
+}
+.ft__legal a:hover,
+.ft__legal button:hover {
+  color: var(--text);
+}
+
 
 @media (min-width: 640px) {
   .ft__grid {

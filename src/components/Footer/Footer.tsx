@@ -1,5 +1,7 @@
 // src/components/Footer/Footer.tsx
+import { Link } from "react-router-dom";
 import { Twitter, Instagram, Youtube, MessageCircle } from "lucide-react";
+import { useCookieConsent } from "../../context/CookieConsentContext";
 import "./Footer.css";
 
 const cols = [
@@ -7,6 +9,8 @@ const cols = [
 ];
 
 const Footer = () => {
+  const { openPreferences } = useCookieConsent();
+
   return (
     <footer id="footer" className="ft">
       <div className="container ft__grid">
@@ -41,7 +45,13 @@ const Footer = () => {
       </div>
 
       <div className="ft__bottom">
-        © {new Date().getFullYear()} Cardify.
+        <span>© {new Date().getFullYear()} Cardify.</span>
+        <span className="ft__legal">
+          <Link to="/politica-de-cookies">Política de cookies</Link>
+          <button type="button" onClick={openPreferences}>
+            Preferencias de cookies
+          </button>
+        </span>
       </div>
     </footer>
   );

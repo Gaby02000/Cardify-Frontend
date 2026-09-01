@@ -1,0 +1,207 @@
+/* ---------- Banner ---------- */
+.cookie {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1200;
+  background: color-mix(in srgb, var(--bg-1) 92%, transparent);
+  backdrop-filter: blur(14px) saturate(1.3);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+  border-top: 1px solid var(--border-strong);
+  box-shadow: 0 -14px 40px -18px rgba(0, 0, 0, 0.7);
+  animation: cookie-in var(--tr-slow) both;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+@keyframes cookie-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+.cookie__inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  padding-block: var(--s-4);
+}
+.cookie__body {
+  display: flex;
+  gap: var(--s-3);
+}
+.cookie__icon {
+  flex-shrink: 0;
+  color: var(--lime);
+  margin-top: 2px;
+}
+.cookie__text {
+  font-size: var(--fs-sm);
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+.cookie__text b {
+  color: var(--text);
+  font-weight: 600;
+}
+.cookie__link {
+  color: var(--lime);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.cookie__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+.cookie__actions .btn {
+  flex: 1;
+  min-width: 130px;
+}
+
+@media (min-width: 860px) {
+  .cookie__inner {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-6);
+  }
+  .cookie__actions {
+    flex-shrink: 0;
+    flex-wrap: nowrap;
+  }
+  .cookie__actions .btn {
+    flex: none;
+  }
+}
+
+/* ---------- Modal de preferencias ---------- */
+.ckmodal__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2200;
+  display: grid;
+  place-items: center;
+  padding: var(--s-4);
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  animation: fade-up var(--tr) both;
+}
+.ckmodal {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  max-height: calc(100dvh - 2 * var(--s-4));
+  overflow-y: auto;
+  padding: var(--s-6);
+  border-radius: var(--r-lg);
+  background: linear-gradient(180deg, var(--bg-2), var(--bg-1));
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--sh-3);
+  animation: confirm-pop var(--tr) cubic-bezier(0.2, 0.9, 0.3, 1.15);
+}
+.ckmodal__close {
+  position: absolute;
+  top: var(--s-4);
+  right: var(--s-4);
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-full);
+  color: var(--text-dim);
+}
+.ckmodal__close:hover {
+  color: var(--text);
+  background: var(--bg-3);
+}
+.ckmodal__title {
+  font-size: var(--fs-h3);
+  padding-right: var(--s-6);
+}
+.ckmodal__desc {
+  margin-top: var(--s-2);
+  margin-bottom: var(--s-5);
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+}
+.ckmodal__desc a {
+  color: var(--lime);
+  text-decoration: underline;
+}
+
+.ckopt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4);
+  padding: var(--s-3) 0;
+  border-top: 1px solid var(--border);
+}
+.ckopt:last-of-type {
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--s-5);
+}
+.ckopt__info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.ckopt__info b {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+.ckopt__info small {
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+.ckopt__state {
+  flex-shrink: 0;
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+}
+
+/* toggle */
+.ckopt__toggle {
+  appearance: none;
+  flex-shrink: 0;
+  width: 42px;
+  height: 24px;
+  border-radius: var(--r-full);
+  background: var(--bg-3);
+  border: 1px solid var(--border-strong);
+  position: relative;
+  cursor: pointer;
+  transition: background var(--tr), border-color var(--tr);
+}
+.ckopt__toggle::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  transition: transform var(--tr), background var(--tr);
+}
+.ckopt__toggle:checked {
+  background: var(--lime-dim);
+  border-color: var(--lime);
+}
+.ckopt__toggle:checked::after {
+  transform: translateX(18px);
+  background: var(--lime);
+}
+
+.ckmodal__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+.ckmodal__actions .btn {
+  flex: 1;
+  min-width: 120px;
+}

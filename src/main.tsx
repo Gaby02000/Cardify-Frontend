@@ -8,18 +8,21 @@ import { ToastProvider } from "./context/ToastContext";
 import { ConfirmProvider } from "./context/ConfirmContext";
 import { UserProvider } from "./context/UserContext";
 import { CartProvider } from "./context/CartContext";
+import { CookieConsentProvider } from "./context/CookieConsentContext";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ToastProvider>
       <PwaUpdater />
-      <ConfirmProvider>
-        <UserProvider>
-          <CartProvider>
-            <App />
-          </CartProvider>
-        </UserProvider>
-      </ConfirmProvider>
+      <CookieConsentProvider>
+        <ConfirmProvider>
+          <UserProvider>
+            <CartProvider>
+              <App />
+            </CartProvider>
+          </UserProvider>
+        </ConfirmProvider>
+      </CookieConsentProvider>
     </ToastProvider>
   </StrictMode>
 );
