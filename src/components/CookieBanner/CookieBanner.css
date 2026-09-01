@@ -58,6 +58,7 @@
 .cookie__actions .btn {
   flex: 1;
   min-width: 130px;
+  white-space: nowrap;
 }
 
 @media (min-width: 860px) {
@@ -198,10 +199,29 @@
 
 .ckmodal__actions {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: var(--s-2);
 }
 .ckmodal__actions .btn {
-  flex: 1;
-  min-width: 120px;
+  width: 100%;
+  white-space: nowrap;
+}
+/* Guardar preferencias: la acción principal, al final */
+.ckmodal__actions .btn-primary {
+  order: 1;
+}
+
+@media (min-width: 480px) {
+  .ckmodal__actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .ckmodal__actions .btn-ghost,
+  .ckmodal__actions .btn-soft {
+    flex: 1;
+    min-width: 130px;
+  }
+  .ckmodal__actions .btn-primary {
+    flex-basis: 100%;
+  }
 }
