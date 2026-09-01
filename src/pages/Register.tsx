@@ -5,6 +5,26 @@ import { Eye, EyeOff, ArrowLeft, AlertCircle } from "lucide-react";
 import api from "../lib/api";
 import "./Auth.css";
 
+// Traducción de los mensajes de validación que devuelve el backend (Laravel, en inglés).
+const ES_ERRORS: Record<string, string> = {
+  "The password field must be at least 6 characters.":
+    "La contraseña debe tener al menos 6 caracteres.",
+  "The password must be at least 6 characters.":
+    "La contraseña debe tener al menos 6 caracteres.",
+  "The password field confirmation does not match.":
+    "Las contraseñas no coinciden.",
+  "The password confirmation does not match.": "Las contraseñas no coinciden.",
+  "The email has already been taken.": "Ese correo ya está registrado.",
+  "The email field must be a valid email address.":
+    "Ingresá un correo electrónico válido.",
+  "The email must be a valid email address.":
+    "Ingresá un correo electrónico válido.",
+  "The name field is required.": "El nombre es obligatorio.",
+  "The email field is required.": "El correo electrónico es obligatorio.",
+  "The password field is required.": "La contraseña es obligatoria.",
+};
+const translateError = (msg: string) => ES_ERRORS[msg] ?? msg;
+
 const Register = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -18,6 +38,17 @@ const Register = () => {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    // Validación en el cliente, con mensajes en español.
+    if (password.length < 6) {
+      setError("La contraseña debe tener al menos 6 caracteres.");
+      return;
+    }
+    if (password !== passwordConfirmation) {
+      setError("Las contraseñas no coinciden.");
+      return;
+    }
+
     setLoading(true);
     try {
       await api.post(`/register`, {
@@ -29,7 +60,12 @@ const Register = () => {
       navigate("/login");
     } catch (err: any) {
       if (err.response?.data?.errors) {
-        setError(Object.values(err.response.data.errors).flat().join("\n"));
+        setError(
+          Object.values(err.response.data.errors)
+            .flat()
+            .map((m) => translateError(String(m)))
+            .join("\n")
+        );
       } else {
         setError(err.response?.data?.message || "Ocurrió un error al registrarse.");
       }
