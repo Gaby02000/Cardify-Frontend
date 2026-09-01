@@ -44,17 +44,24 @@ function readCache(userId?: number): MyOrder[] | null {
   }
 }
 
+const idle: (cb: () => void) => void =
+  typeof window !== "undefined" && "requestIdleCallback" in window
+    ? (cb) => window.requestIdleCallback(cb, { timeout: 2000 })
+    : (cb) => setTimeout(cb, 1);
+
 function writeCache(userId: number, orders: MyOrder[]) {
-  try {
-    const payload: CacheShape = {
-      userId,
-      savedAt: new Date().toISOString(),
-      orders,
-    };
-    localStorage.setItem(ORDERS_CACHE_KEY, JSON.stringify(payload));
-  } catch {
-    /* storage lleno / bloqueado: seguimos solo en memoria */
-  }
+  idle(() => {
+    try {
+      const payload: CacheShape = {
+        userId,
+        savedAt: new Date().toISOString(),
+        orders,
+      };
+      localStorage.setItem(ORDERS_CACHE_KEY, JSON.stringify(payload));
+    } catch {
+      /* storage lleno / bloqueado: seguimos solo en memoria */
+    }
+  });
 }
 
 export function clearOrdersCache() {

@@ -87,3 +87,11 @@
     max-width: 40ch;
   }
 }
+
+/* Reserva de espacio mientras cargan las secciones diferidas (evita saltos) */
+.home__loading {
+  min-height: 220px;
+}
+.home__loading--tall {
+  min-height: 620px;
+}

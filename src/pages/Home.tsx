@@ -1,9 +1,13 @@
 // src/pages/Home.tsx
+import { lazy, Suspense } from "react";
 import { Sparkles, Zap, ShieldCheck } from "lucide-react";
-import PopularCategories from "../components/Category/PopularCategories";
-import GiftCardList from "../components/GiftCard/GiftCardList";
-import Footer from "../components/Footer/Footer";
 import "./Home.css";
+
+// Todo lo que está debajo del pliegue se carga aparte, para que el hero
+// (que es el LCP) pinte con el mínimo de JavaScript.
+const PopularCategories = lazy(() => import("../components/Category/PopularCategories"));
+const GiftCardList = lazy(() => import("../components/GiftCard/GiftCardList"));
+const Footer = lazy(() => import("../components/Footer/Footer"));
 
 const Home = () => {
   return (
@@ -64,7 +68,9 @@ const Home = () => {
           <h2 className="section-title">Categorías populares</h2>
           <p>Encontrá la tarjeta perfecta para cada tipo de regalo.</p>
         </div>
-        <PopularCategories />
+        <Suspense fallback={<div className="home__loading" />}>
+          <PopularCategories />
+        </Suspense>
       </section>
 
       {/* ---------- Gift cards ---------- */}
@@ -76,10 +82,14 @@ const Home = () => {
           <h2 className="section-title">Nuestras gift cards</h2>
           <p>Precios claros, stock real y entrega inmediata.</p>
         </div>
-        <GiftCardList />
+        <Suspense fallback={<div className="home__loading home__loading--tall" />}>
+          <GiftCardList />
+        </Suspense>
       </section>
 
-      <Footer />
+      <Suspense fallback={null}>
+        <Footer />
+      </Suspense>
     </>
   );
 };

@@ -24,13 +24,21 @@ function readCache(): GiftCard[] | null {
   }
 }
 
+// Guardar (JSON.stringify de todo el catálogo) fuera del hilo crítico.
+const idle: (cb: () => void) => void =
+  typeof window !== "undefined" && "requestIdleCallback" in window
+    ? (cb) => window.requestIdleCallback(cb, { timeout: 2000 })
+    : (cb) => setTimeout(cb, 1);
+
 function writeCache(giftcards: GiftCard[]) {
-  try {
-    const payload: CacheShape = { savedAt: new Date().toISOString(), giftcards };
-    localStorage.setItem(GIFTCARDS_CACHE_KEY, JSON.stringify(payload));
-  } catch {
-    /* storage lleno / bloqueado */
-  }
+  idle(() => {
+    try {
+      const payload: CacheShape = { savedAt: new Date().toISOString(), giftcards };
+      localStorage.setItem(GIFTCARDS_CACHE_KEY, JSON.stringify(payload));
+    } catch {
+      /* storage lleno / bloqueado */
+    }
+  });
 }
 
 export function useGiftcards() {
