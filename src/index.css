@@ -372,6 +372,14 @@ h4 {
   animation: spin 0.7s linear infinite;
 }
 
+.route-fallback {
+  min-height: 60vh;
+  display: grid;
+  place-items: center;
+  color: var(--text-dim);
+  font-size: 1.5rem;
+}
+
 .skeleton {
   background: linear-gradient(90deg, var(--bg-2), var(--bg-3), var(--bg-2));
   background-size: 200% 100%;

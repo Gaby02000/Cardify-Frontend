@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   Menu,
@@ -10,8 +10,10 @@ import {
   UserCog,
   ChevronDown,
 } from "lucide-react";
-import CartDrawer from "../Cart/CartDrawer";
 import PushOptIn from "../PushOptIn";
+
+// El carrito solo se necesita cuando se abre.
+const CartDrawer = lazy(() => import("../Cart/CartDrawer"));
 import { useUser } from "../../context/UserContext";
 import { useCart } from "../../context/CartContext";
 import "./Navbar.css";
@@ -33,7 +35,13 @@ const initials = (name: string) =>
 
 const Navbar = () => {
   const [cartOpen, setCartOpen] = useState(false);
+  const [cartTouched, setCartTouched] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const openCart = () => {
+    setCartTouched(true);
+    setCartOpen(true);
+  };
   const [userMenu, setUserMenu] = useState(false);
   const userWrapRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -110,7 +118,7 @@ const Navbar = () => {
 
             <button
               className="nav__cart"
-              onClick={() => setCartOpen(true)}
+              onClick={openCart}
               aria-label={`Abrir carrito (${count})`}
             >
               <ShoppingCart size={19} />
@@ -232,7 +240,11 @@ const Navbar = () => {
         )}
       </header>
 
-      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
+      {cartTouched && (
+        <Suspense fallback={null}>
+          <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
+        </Suspense>
+      )}
     </>
   );
 };

@@ -1,17 +1,25 @@
 // src/App.tsx
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import ConfirmedOrder from "./pages/ConfirmedOrder";
-import FailedOrder from "./pages/FailedOrder";
-import MyOrders from "./pages/MyOrders";
-import Account from "./pages/Account";
-import CookiePolicy from "./pages/CookiePolicy";
 import Navbar from "./components/Navbar/Navbar";
 import AuthLoader from "./components/AuthLoader";
 import CookieBanner from "./components/CookieBanner/CookieBanner";
+
+// Rutas secundarias: se cargan cuando se visitan (menos JS en la primera carga).
+const Login = lazy(() => import("./pages/Login"));
+const Register = lazy(() => import("./pages/Register"));
+const ConfirmedOrder = lazy(() => import("./pages/ConfirmedOrder"));
+const FailedOrder = lazy(() => import("./pages/FailedOrder"));
+const MyOrders = lazy(() => import("./pages/MyOrders"));
+const Account = lazy(() => import("./pages/Account"));
+const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
+
+const RouteFallback = () => (
+  <div className="route-fallback">
+    <span className="spinner" />
+  </div>
+);
 
 // Al cambiar de ruta (sin hash), volvemos arriba de todo.
 const ScrollToTop = () => {
@@ -30,16 +38,18 @@ const AppWrapper = () => {
     <AuthLoader>
       <ScrollToTop />
       {!hideNavbarRoutes.includes(location.pathname) && <Navbar />}
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/order-confirmed" element={<ConfirmedOrder />} />
-        <Route path="/order-failed" element={<FailedOrder />} />
-        <Route path="/mis-compras" element={<MyOrders />} />
-        <Route path="/mi-cuenta" element={<Account />} />
-        <Route path="/politica-de-cookies" element={<CookiePolicy />} />
-      </Routes>
+      <Suspense fallback={<RouteFallback />}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/order-confirmed" element={<ConfirmedOrder />} />
+          <Route path="/order-failed" element={<FailedOrder />} />
+          <Route path="/mis-compras" element={<MyOrders />} />
+          <Route path="/mi-cuenta" element={<Account />} />
+          <Route path="/politica-de-cookies" element={<CookiePolicy />} />
+        </Routes>
+      </Suspense>
       <CookieBanner />
     </AuthLoader>
   );
