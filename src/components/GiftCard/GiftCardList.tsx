@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import GiftcardItem from "./GiftCardItem";
 import { useGiftcards } from "../../hooks/useGiftcards";
-import type { GiftcardQuery } from "../../hooks/useGiftcards";
+import type { GiftcardSort } from "../../hooks/useGiftcards";
 import { useCategories } from "../../hooks/useCategories";
 import "./GiftCard.css";
 
@@ -17,7 +17,7 @@ const PER_PAGE = 10;
 type SortDef = {
   value: string;
   label: string;
-  sort: GiftcardQuery["sort"];
+  sort: GiftcardSort;
   direction: "asc" | "desc";
 };
 
@@ -30,7 +30,7 @@ const SORTS: SortDef[] = [
   { value: "stock-desc", label: "Más stock", sort: "stock", direction: "desc" },
 ];
 
-function useDebounced<T>(value: T, delay = 350): T {
+function useDebounced<T>(value: T, delay = 300): T {
   const [debounced, setDebounced] = useState(value);
   useEffect(() => {
     const id = setTimeout(() => setDebounced(value), delay);
@@ -55,6 +55,10 @@ const GiftcardList = () => {
   const { categories } = useCategories();
   const offline = typeof navigator !== "undefined" && !navigator.onLine;
 
+  // Se trae TODO el catálogo una vez (o del cache). A partir de acá,
+  // buscar / filtrar / ordenar / paginar es en memoria.
+  const { giftcards: all, loading, error, fromCache } = useGiftcards();
+
   const [searchInput, setSearchInput] = useState("");
   const search = useDebounced(searchInput);
   const [category, setCategory] = useState("");
@@ -67,17 +71,48 @@ const GiftcardList = () => {
     setPage(1);
   }, [search, category, sortValue]);
 
-  const { giftcards, meta, loading, error } = useGiftcards({
-    page,
-    perPage: PER_PAGE,
-    category,
-    search,
-    sort: sortDef.sort,
-    direction: sortDef.direction,
-  });
+  const filtered = useMemo(() => {
+    let list = all;
+
+    const term = search.trim().toLowerCase();
+    if (term) {
+      list = list.filter((g) =>
+        `${g.title} ${g.description}`.toLowerCase().includes(term)
+      );
+    }
+    if (category) {
+      list = list.filter((g) => String(g.id_category) === category);
+    }
+
+    const dir = sortDef.direction === "asc" ? 1 : -1;
+    return [...list].sort((a, b) => {
+      let diff: number;
+      switch (sortDef.sort) {
+        case "price":
+          diff = Number(a.price) - Number(b.price);
+          break;
+        case "stock":
+          diff = a.stock - b.stock;
+          break;
+        case "title":
+          diff = a.title.localeCompare(b.title, "es");
+          break;
+        default:
+          return b.id - a.id; // "Destacadas": novedades primero
+      }
+      return diff * dir || b.id - a.id;
+    });
+  }, [all, search, category, sortDef.sort, sortDef.direction]);
+
+  const total = filtered.length;
+  const lastPage = Math.max(1, Math.ceil(total / PER_PAGE));
+  const currentPage = Math.min(page, lastPage);
+  const from = total === 0 ? 0 : (currentPage - 1) * PER_PAGE + 1;
+  const to = Math.min(currentPage * PER_PAGE, total);
+  const pageItems = filtered.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE);
 
   const hasFilters = Boolean(searchInput || category || sortValue);
-  const firstLoad = loading && giftcards.length === 0 && !error;
+  const firstLoad = loading && all.length === 0 && !error;
 
   const clearAll = () => {
     setSearchInput("");
@@ -86,15 +121,12 @@ const GiftcardList = () => {
   };
 
   const goto = (p: number) => {
-    if (p < 1 || p > meta.lastPage || p === meta.currentPage) return;
+    if (p < 1 || p > lastPage || p === currentPage) return;
     setPage(p);
     document.getElementById("giftcards")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  const pages = useMemo(
-    () => pageWindow(meta.currentPage, meta.lastPage),
-    [meta.currentPage, meta.lastPage]
-  );
+  const pages = useMemo(() => pageWindow(currentPage, lastPage), [currentPage, lastPage]);
 
   return (
     <div>
@@ -151,18 +183,25 @@ const GiftcardList = () => {
         </div>
       </div>
 
+      {fromCache && !error && (
+        <p className="gc-cache-note">
+          Mostrando el catálogo guardado en este dispositivo; puede estar
+          desactualizado.
+        </p>
+      )}
+
       {/* --- Resumen --- */}
       <div className="gc-resultbar">
         <span>
           {error
             ? offline
-              ? "Sin conexión y no hay resultados guardados para esta búsqueda."
+              ? "Sin conexión y todavía no guardamos el catálogo."
               : "No se pudieron cargar las gift cards."
             : firstLoad
             ? "Cargando…"
-            : meta.total === 0
+            : total === 0
             ? "Sin resultados"
-            : `Mostrando ${meta.from}–${meta.to} de ${meta.total}`}
+            : `Mostrando ${from}–${to} de ${total}`}
         </span>
         {hasFilters && (
           <button className="gc-chip-clear" onClick={clearAll}>
@@ -178,29 +217,29 @@ const GiftcardList = () => {
             <div key={i} className="skeleton gc-skeleton" />
           ))}
         </div>
-      ) : error || meta.total === 0 ? (
+      ) : error || total === 0 ? (
         <p className="gc-empty">
           {error
             ? offline
-              ? "Estás sin conexión y todavía no se guardó ninguna gift card. Reconectá para verlas."
+              ? "Estás sin conexión y todavía no abriste la tienda estando conectado, así que no hay catálogo guardado."
               : "Hubo un problema al cargar las gift cards. Probá de nuevo."
             : "No encontramos gift cards con esos filtros."}
         </p>
       ) : (
-        <div className={`gc-grid ${loading ? "is-busy" : ""}`}>
-          {giftcards.map((g) => (
+        <div className="gc-grid">
+          {pageItems.map((g) => (
             <GiftcardItem key={g.id} giftcard={g} />
           ))}
         </div>
       )}
 
       {/* --- Paginación --- */}
-      {!error && meta.lastPage > 1 && (
+      {!error && lastPage > 1 && (
         <nav className="gc-pagination" aria-label="Paginación">
           <button
             className="gc-page"
-            onClick={() => goto(meta.currentPage - 1)}
-            disabled={meta.currentPage <= 1}
+            onClick={() => goto(currentPage - 1)}
+            disabled={currentPage <= 1}
             aria-label="Página anterior"
           >
             <ChevronLeft size={16} />
@@ -214,9 +253,9 @@ const GiftcardList = () => {
             ) : (
               <button
                 key={p}
-                className={`gc-page ${p === meta.currentPage ? "is-active" : ""}`}
+                className={`gc-page ${p === currentPage ? "is-active" : ""}`}
                 onClick={() => goto(p)}
-                aria-current={p === meta.currentPage ? "page" : undefined}
+                aria-current={p === currentPage ? "page" : undefined}
               >
                 {p}
               </button>
@@ -225,8 +264,8 @@ const GiftcardList = () => {
 
           <button
             className="gc-page"
-            onClick={() => goto(meta.currentPage + 1)}
-            disabled={meta.currentPage >= meta.lastPage}
+            onClick={() => goto(currentPage + 1)}
+            disabled={currentPage >= lastPage}
             aria-label="Página siguiente"
           >
             <ChevronRight size={16} />

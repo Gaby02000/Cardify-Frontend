@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 
 const apiUrl = import.meta.env.VITE_API_URL;
+const CACHE_KEY = "categories";
 
 export interface Category {
   id: number;
@@ -10,27 +11,52 @@ export interface Category {
   icon?: string;
 }
 
+function readCache(): Category[] {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    const parsed = raw ? JSON.parse(raw) : null;
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+const normalize = (data: unknown): Category[] => {
+  if (Array.isArray(data)) return data as Category[];
+  if (data && Array.isArray((data as { data?: unknown }).data)) {
+    return (data as { data: Category[] }).data;
+  }
+  return [];
+};
+
 export const useCategories = () => {
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<Category[]>(() => readCache());
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${apiUrl}/categories`)
+    const ctrl = new AbortController();
+
+    fetch(`${apiUrl}/categories`, { signal: ctrl.signal })
       .then((res) => res.json())
       .then((data) => {
-        console.log("Categorías recibidas:", data); // 👈 LOG
-        // Ajustar esto según lo que devuelva tu API
-        if (Array.isArray(data)) {
-          setCategories(data);
-        } else if (Array.isArray(data.data)) {
-          setCategories(data.data);
-        } else {
-          console.error("Formato inesperado:", data);
-          setCategories([]);
+        const list = normalize(data);
+        setCategories(list);
+        try {
+          localStorage.setItem(CACHE_KEY, JSON.stringify(list));
+        } catch {
+          /* noop */
         }
       })
-      .catch((err) => console.error("Error cargando categorías", err))
-      .finally(() => setLoading(false));
+      .catch((err) => {
+        if (err?.name === "AbortError") return;
+        console.warn("Categorías: usando copia guardada", err?.message);
+        setCategories(readCache());
+      })
+      .finally(() => {
+        if (!ctrl.signal.aborted) setLoading(false);
+      });
+
+    return () => ctrl.abort();
   }, []);
 
   return { categories, loading };

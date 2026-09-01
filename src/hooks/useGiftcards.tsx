@@ -1,91 +1,88 @@
-import { useEffect, useState } from "react";
+// src/hooks/useGiftcards.tsx
+// Trae TODO el catálogo una sola vez y lo guarda en localStorage. El
+// buscador / filtro / orden / paginación se hacen en memoria en la lista,
+// así se puede navegar y filtrar sin conexión una vez cargado.
+import { useCallback, useEffect, useState } from "react";
 import type { GiftCard, GiftcardPagination } from "../components/GiftCard/types";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
-export interface GiftcardQuery {
-  page?: number;
-  perPage?: number;
-  category?: string; // id de categoría; "" = todas
-  search?: string;
-  sort?: "" | "price" | "title" | "stock";
-  direction?: "asc" | "desc";
+export type GiftcardSort = "" | "price" | "title" | "stock";
+
+export const GIFTCARDS_CACHE_KEY = "giftcards";
+
+type CacheShape = { savedAt: string; giftcards: GiftCard[] };
+
+function readCache(): GiftCard[] | null {
+  try {
+    const raw = localStorage.getItem(GIFTCARDS_CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as CacheShape;
+    return Array.isArray(parsed?.giftcards) ? parsed.giftcards : null;
+  } catch {
+    return null;
+  }
 }
 
-export interface GiftcardMeta {
-  currentPage: number;
-  lastPage: number;
-  total: number;
-  from: number;
-  to: number;
+function writeCache(giftcards: GiftCard[]) {
+  try {
+    const payload: CacheShape = { savedAt: new Date().toISOString(), giftcards };
+    localStorage.setItem(GIFTCARDS_CACHE_KEY, JSON.stringify(payload));
+  } catch {
+    /* storage lleno / bloqueado */
+  }
 }
 
-const EMPTY_META: GiftcardMeta = {
-  currentPage: 1,
-  lastPage: 1,
-  total: 0,
-  from: 0,
-  to: 0,
-};
-
-export function useGiftcards(query: GiftcardQuery = {}) {
-  const {
-    page = 1,
-    perPage = 10,
-    category = "",
-    search = "",
-    sort = "",
-    direction = "asc",
-  } = query;
-
-  const [giftcards, setGiftcards] = useState<GiftCard[]>([]);
-  const [meta, setMeta] = useState<GiftcardMeta>(EMPTY_META);
+export function useGiftcards() {
+  const [giftcards, setGiftcards] = useState<GiftCard[]>(() => readCache() ?? []);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [fromCache, setFromCache] = useState(false);
 
-  useEffect(() => {
-    const params = new URLSearchParams();
-    params.set("page", String(page));
-    params.set("per_page", String(perPage));
-    if (category) params.set("category", category);
-    if (search.trim()) params.set("search", search.trim());
-    if (sort) {
-      params.set("sort", sort);
-      params.set("direction", direction);
-    }
-
-    const ctrl = new AbortController();
+  const load = useCallback(async (signal?: AbortSignal) => {
     setLoading(true);
     setError(false);
 
-    fetch(`${apiUrl}/giftcards?${params.toString()}`, { signal: ctrl.signal })
-      .then((res) => {
+    try {
+      const all: GiftCard[] = [];
+      let page = 1;
+      let lastPage = 1;
+
+      do {
+        const res = await fetch(
+          `${apiUrl}/giftcards?per_page=1000&page=${page}`,
+          { signal }
+        );
         if (!res.ok) throw new Error("Error de servidor");
-        return res.json();
-      })
-      .then((data: GiftcardPagination) => {
-        setGiftcards(data.data ?? []);
-        setMeta({
-          currentPage: data.current_page ?? 1,
-          lastPage: data.last_page ?? 1,
-          total: data.total ?? 0,
-          from: data.from ?? 0,
-          to: data.to ?? 0,
-        });
-      })
-      .catch((err) => {
-        if (err?.name === "AbortError") return;
-        console.error("Error al cargar giftcards:", err);
+        const data: GiftcardPagination = await res.json();
+        all.push(...(data.data ?? []));
+        lastPage = data.last_page ?? 1;
+        page += 1;
+      } while (page <= lastPage);
+
+      setGiftcards(all);
+      setFromCache(false);
+      writeCache(all);
+    } catch (err: unknown) {
+      if ((err as { name?: string })?.name === "AbortError") return;
+      const cached = readCache();
+      if (cached) {
+        setGiftcards(cached);
+        setFromCache(true);
+      } else {
         setError(true);
         setGiftcards([]);
-        setMeta(EMPTY_META);
-      })
-      .finally(() => {
-        if (!ctrl.signal.aborted) setLoading(false);
-      });
+      }
+    } finally {
+      if (!signal?.aborted) setLoading(false);
+    }
+  }, []);
 
+  useEffect(() => {
+    const ctrl = new AbortController();
+    load(ctrl.signal);
     return () => ctrl.abort();
-  }, [page, perPage, category, search, sort, direction]);
+  }, [load]);
 
-  return { giftcards, meta, loading, error };
+  return { giftcards, loading, error, fromCache, refetch: () => load() };
 }

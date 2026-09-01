@@ -95,6 +95,16 @@
   color: var(--text);
 }
 
+.gc-cache-note {
+  margin-bottom: var(--s-3);
+  padding: var(--s-2) var(--s-3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--bg-1);
+  font-size: var(--fs-xs);
+  color: var(--text-dim);
+}
+
 .gc-resultbar {
   display: flex;
   align-items: center;
