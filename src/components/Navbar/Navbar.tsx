@@ -20,8 +20,7 @@ import "./Navbar.css";
 
 const links = [
   { href: "#inicio", label: "Inicio" },
-  { href: "#categorias", label: "Categorías" },
-  { href: "#giftcards", label: "Gift Cards" },
+  { href: "#catalogo", label: "Catálogo" },
   { href: "#footer", label: "Contacto" },
 ];
 

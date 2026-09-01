@@ -5,8 +5,7 @@ import "./Home.css";
 
 // Todo lo que está debajo del pliegue se carga aparte, para que el hero
 // (que es el LCP) pinte con el mínimo de JavaScript.
-const PopularCategories = lazy(() => import("../components/Category/PopularCategories"));
-const GiftCardList = lazy(() => import("../components/GiftCard/GiftCardList"));
+const CatalogBrowser = lazy(() => import("../components/Catalog/CatalogBrowser"));
 const Footer = lazy(() => import("../components/Footer/Footer"));
 
 const Home = () => {
@@ -33,10 +32,10 @@ const Home = () => {
           </p>
 
           <div className="hero__cta">
-            <a href="#giftcards" className="btn btn-primary btn-lg">
+            <a href="#catalogo" className="btn btn-primary btn-lg">
               <Zap size={18} /> Explorar tarjetas
             </a>
-            <a href="#categorias" className="btn btn-ghost btn-lg">
+            <a href="#catalogo" className="btn btn-ghost btn-lg">
               Ver categorías
             </a>
           </div>
@@ -59,31 +58,22 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ---------- Categorías ---------- */}
-      <section id="categorias" className="section container">
+      {/* ---------- Catálogo ---------- */}
+      <section id="catalogo" className="section container">
         <div className="section-head center">
           <span className="eyebrow">
             <ShieldCheck size={14} /> Elegí por gusto
           </span>
-          <h2 className="section-title">Categorías populares</h2>
-          <p>Encontrá la tarjeta perfecta para cada tipo de regalo.</p>
+          <h2 className="section-title">Explorá el catálogo</h2>
+          <p>
+            Mirá las tarjetas agrupadas por categoría o abrí la lista completa
+            con buscador y filtros.
+          </p>
         </div>
-        <Suspense fallback={<div className="home__loading" />}>
-          <PopularCategories />
-        </Suspense>
-      </section>
-
-      {/* ---------- Gift cards ---------- */}
-      <section id="giftcards" className="section container">
-        <div className="section-head center">
-          <span className="eyebrow">
-            <Sparkles size={14} /> Destacadas
-          </span>
-          <h2 className="section-title">Nuestras gift cards</h2>
-          <p>Precios claros, stock real y entrega inmediata.</p>
-        </div>
-        <Suspense fallback={<div className="home__loading home__loading--tall" />}>
-          <GiftCardList />
+        <Suspense
+          fallback={<div className="home__loading home__loading--tall" />}
+        >
+          <CatalogBrowser />
         </Suspense>
       </section>
 
