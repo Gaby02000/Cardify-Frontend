@@ -101,13 +101,19 @@ const GiftcardItem: React.FC<Props> = ({ giftcard }) => {
 
         {/* Back */}
         <div className="gc__face gc__face--back">
-          <h3>{giftcard.title}</h3>
-          <p>{giftcard.description || "Sin descripción disponible."}</p>
-          <p>
-            <strong>{money(finalPrice)}</strong>
-            {hasDiscount && ` · antes ${money(listPrice)}`}
-            {giftcard.amount && ` · saldo ${money(Number(giftcard.amount))}`}
-          </p>
+          <h3 className="gc__back-title">{giftcard.title}</h3>
+          {giftcard.category?.name && (
+            <span className="gc__back-cat">{giftcard.category.name}</span>
+          )}
+          <div className="gc__back-price">
+            <b>{money(finalPrice)}</b>
+            {hasDiscount && <s>{money(listPrice)}</s>}
+            {giftcard.amount && (
+              <span className="gc__back-balance">
+                Saldo {money(Number(giftcard.amount))}
+              </span>
+            )}
+          </div>
           <button className="btn btn-ghost" onClick={() => setFlipped(false)}>
             <RotateCcw size={15} /> Volver
           </button>

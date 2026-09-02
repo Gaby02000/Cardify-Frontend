@@ -27,7 +27,6 @@ const SORTS: SortDef[] = [
   { value: "price-desc", label: "Precio: mayor a menor", sort: "price", direction: "desc" },
   { value: "title-asc", label: "Nombre: A → Z", sort: "title", direction: "asc" },
   { value: "title-desc", label: "Nombre: Z → A", sort: "title", direction: "desc" },
-  { value: "stock-desc", label: "Más stock", sort: "stock", direction: "desc" },
 ];
 
 function useDebounced<T>(value: T, delay = 300): T {
@@ -90,9 +89,6 @@ const GiftcardList = () => {
       switch (sortDef.sort) {
         case "price":
           diff = Number(a.price) - Number(b.price);
-          break;
-        case "stock":
-          diff = a.stock - b.stock;
           break;
         case "title":
           diff = a.title.localeCompare(b.title, "es");

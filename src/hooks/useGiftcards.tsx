@@ -7,7 +7,7 @@ import type { GiftCard, GiftcardPagination } from "../components/GiftCard/types"
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
-export type GiftcardSort = "" | "price" | "title" | "stock";
+export type GiftcardSort = "" | "price" | "title";
 
 export const GIFTCARDS_CACHE_KEY = "giftcards";
 
