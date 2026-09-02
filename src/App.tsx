@@ -13,6 +13,8 @@ const FailedOrder = lazy(() => import("./pages/FailedOrder"));
 const MyOrders = lazy(() => import("./pages/MyOrders"));
 const Account = lazy(() => import("./pages/Account"));
 const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const About = lazy(() => import("./pages/About"));
 const CategoryPage = lazy(() => import("./pages/CategoryPage"));
 
 // UI no crítica: banner de cookies + registro del service worker. Se montan
@@ -81,6 +83,8 @@ const AppWrapper = () => {
           <Route path="/mis-compras" element={<MyOrders />} />
           <Route path="/mi-cuenta" element={<Account />} />
           <Route path="/politica-de-cookies" element={<CookiePolicy />} />
+          <Route path="/politica-de-privacidad" element={<PrivacyPolicy />} />
+          <Route path="/nosotros" element={<About />} />
         </Routes>
       </Suspense>
       <DeferredUI />

@@ -108,11 +108,6 @@ const GiftcardItem: React.FC<Props> = ({ giftcard }) => {
           <div className="gc__back-price">
             <b>{money(finalPrice)}</b>
             {hasDiscount && <s>{money(listPrice)}</s>}
-            {giftcard.amount && (
-              <span className="gc__back-balance">
-                Saldo {money(Number(giftcard.amount))}
-              </span>
-            )}
           </div>
           <button className="btn btn-ghost" onClick={() => setFlipped(false)}>
             <RotateCcw size={15} /> Volver

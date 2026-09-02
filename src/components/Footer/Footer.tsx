@@ -4,10 +4,6 @@ import { Twitter, Instagram, Youtube, MessageCircle } from "lucide-react";
 import { useCookieConsent } from "../../context/CookieConsentContext";
 import "./Footer.css";
 
-const cols = [
-  { title: "Categorías", items: ["Gaming", "Entretenimiento", "Moda", "Tecnología"] },
-];
-
 const Footer = () => {
   const { openPreferences } = useCookieConsent();
 
@@ -30,24 +26,21 @@ const Footer = () => {
           </div>
         </div>
 
-        {cols.map((col) => (
-          <div className="ft__col" key={col.title}>
-            <h4>{col.title}</h4>
-            <ul>
-              {col.items.map((it) => (
-                <li key={it}>
-                  <a href="#">{it}</a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+        <div className="ft__col">
+          <h4>Cardify</h4>
+          <ul>
+            <li><Link to="/nosotros">Nosotros</Link></li>
+            <li><Link to="/politica-de-cookies">Política de cookies</Link></li>
+            <li><Link to="/politica-de-privacidad">Política de privacidad</Link></li>
+          </ul>
+        </div>
       </div>
 
       <div className="ft__bottom">
         <span>© {new Date().getFullYear()} Cardify.</span>
         <span className="ft__legal">
           <Link to="/politica-de-cookies">Política de cookies</Link>
+          <Link to="/politica-de-privacidad">Política de privacidad</Link>
           <button type="button" onClick={openPreferences}>
             Preferencias de cookies
           </button>
