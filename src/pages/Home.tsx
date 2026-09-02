@@ -19,7 +19,7 @@ const Home = () => {
         <div className="container">
         <div className="hero__inner fade-up">
           <span className="eyebrow">
-            <Sparkles size={14} /> Regalos digitales al instante
+            <Sparkles size={14} /> codigos digitales al instante
           </span>
 
           <h1>
@@ -27,7 +27,7 @@ const Home = () => {
           </h1>
 
           <p className="hero__lead">
-            Steam, PlayStation, Netflix y más. Elegís, pagás y recibís el código
+            Steam, Valorant, League of Legends y más. Elegís, pagás y recibís el código
             en tu correo en segundos.
           </p>
 
