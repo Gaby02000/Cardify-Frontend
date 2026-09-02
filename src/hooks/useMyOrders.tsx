@@ -12,8 +12,10 @@ export interface MyOrderCode {
 
 export interface MyOrderItem {
   title: string;
+  image?: string | null;
   quantity: number;
   price: number | string;
+  line_total?: number | string;
 }
 
 export interface MyOrder {

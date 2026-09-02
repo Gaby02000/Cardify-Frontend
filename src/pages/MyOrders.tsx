@@ -9,14 +9,26 @@ import {
   RefreshCw,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
+  FileDown,
   SlidersHorizontal,
 } from "lucide-react";
 import { useUser } from "../context/UserContext";
+import { useToast } from "../context/ToastContext";
 import { useMyOrders } from "../hooks/useMyOrders";
 import type { MyOrder } from "../hooks/useMyOrders";
+import api from "../lib/api";
 import "./MyOrders.css";
 
 const PER_PAGE = 10;
+
+const API_ORIGIN = (import.meta.env.VITE_API_URL || "").replace(/\/apis\/?$/, "");
+
+const resolveImage = (image?: string | null) => {
+  if (!image) return null;
+  if (/^https?:\/\//.test(image)) return image;
+  return `${API_ORIGIN}/${image.replace(/^\/+/, "")}`;
+};
 
 const money = (n: number | string) =>
   new Intl.NumberFormat("es-AR", {
@@ -101,8 +113,13 @@ function pageWindow(current: number, last: number): (number | "dots")[] {
 }
 
 const OrderCard = ({ order }: { order: MyOrder }) => {
+  const toast = useToast();
+  const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
+  const [downloading, setDownloading] = useState(false);
   const { label, variant } = statusInfo(order.status);
+
+  const units = order.items.reduce((n, it) => n + it.quantity, 0);
 
   const copy = (code: string) => {
     navigator.clipboard?.writeText(code).catch(() => {});
@@ -110,47 +127,127 @@ const OrderCard = ({ order }: { order: MyOrder }) => {
     setTimeout(() => setCopied(null), 1600);
   };
 
+  const downloadReceipt = async () => {
+    if (downloading) return;
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      toast.error("Necesitás conexión para descargar el recibo.");
+      return;
+    }
+    setDownloading(true);
+    try {
+      const res = await api.get(`/orders/receipt/${order.number}`, {
+        responseType: "blob",
+      });
+      const url = URL.createObjectURL(res.data as Blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `recibo-cardify-${order.number}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      toast.error("No se pudo generar el recibo. Probá de nuevo.");
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   return (
-    <article className="myorders__card">
-      <header className="myorders__head">
-        <div>
+    <article className={`myorders__card ${open ? "is-open" : ""}`}>
+      <button
+        className="myorders__toggle"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+      >
+        <span className="myorders__toggle-main">
           <span className="myorders__id">Orden {order.number}</span>
           <span className="myorders__date">{fmtDate(order.created_at)}</span>
-        </div>
-        <span className={`myorders__badge myorders__badge--${variant}`}>{label}</span>
-      </header>
+        </span>
+        <span className="myorders__toggle-side">
+          <span className={`myorders__badge myorders__badge--${variant}`}>
+            {label}
+          </span>
+          <b className="myorders__total">{money(order.total_price)}</b>
+          <ChevronDown size={18} className="myorders__chev" />
+        </span>
+      </button>
 
-      <ul className="myorders__items">
-        {order.items.map((it, i) => (
-          <li key={i}>
-            <span className="myorders__item-title">{it.title}</span>
-            <span className="myorders__item-qty">×{it.quantity}</span>
-            <span className="myorders__item-price">{money(it.price)}</span>
-          </li>
-        ))}
-      </ul>
+      <p className="myorders__meta">
+        {units} {units === 1 ? "producto" : "productos"}
+        {order.codes.length > 0 &&
+          ` · ${order.codes.length} ${
+            order.codes.length === 1 ? "código" : "códigos"
+          }`}
+        {!open && " · tocá para ver el detalle"}
+      </p>
 
-      {order.codes.length > 0 && (
-        <div className="myorders__codes">
-          <p className="eyebrow">Tus códigos</p>
-          <ul>
-            {order.codes.map((c, i) => (
-              <li key={i}>
-                <span className="myorders__code-gc">{c.gift_card}</span>
-                <button className="myorders__code" onClick={() => copy(c.code)}>
-                  <code>{c.code}</code>
-                  {copied === c.code ? <Check size={14} /> : <Copy size={14} />}
-                </button>
-              </li>
-            ))}
+      {open && (
+        <div className="myorders__detail">
+          {order.items.length === 0 && (
+            <p className="myorders__meta">Esta compra no tiene detalle de productos.</p>
+          )}
+          <ul className="myorders__items">
+            {order.items.map((it, i) => {
+              const img = resolveImage(it.image);
+              const lineTotal =
+                it.line_total != null
+                  ? Number(it.line_total)
+                  : Number(it.price) * it.quantity;
+              return (
+                <li key={i}>
+                  {img ? (
+                    <img className="myorders__item-img" src={img} alt="" loading="lazy" />
+                  ) : (
+                    <span className="myorders__item-img myorders__item-img--ph">
+                      <Package size={16} />
+                    </span>
+                  )}
+                  <span className="myorders__item-info">
+                    <span className="myorders__item-title">{it.title}</span>
+                    <span className="myorders__item-unit">
+                      {money(it.price)} c/u
+                    </span>
+                  </span>
+                  <span className="myorders__item-qty">×{it.quantity}</span>
+                  <span className="myorders__item-price">{money(lineTotal)}</span>
+                </li>
+              );
+            })}
           </ul>
+
+          {order.codes.length > 0 && (
+            <div className="myorders__codes">
+              <p className="eyebrow">Tus códigos</p>
+              <ul>
+                {order.codes.map((c, i) => (
+                  <li key={i}>
+                    <span className="myorders__code-gc">{c.gift_card}</span>
+                    <button className="myorders__code" onClick={() => copy(c.code)}>
+                      <code>{c.code}</code>
+                      {copied === c.code ? <Check size={14} /> : <Copy size={14} />}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <div className="myorders__detail-foot">
+            <span className="myorders__detail-total">
+              Total <b>{money(order.total_price)}</b>
+            </span>
+            <button
+              className="myorders__pdf"
+              onClick={downloadReceipt}
+              disabled={downloading}
+            >
+              <FileDown size={15} />
+              {downloading ? "Generando…" : "Descargar recibo (PDF)"}
+            </button>
+          </div>
         </div>
       )}
-
-      <footer className="myorders__foot">
-        <span>Total</span>
-        <b>{money(order.total_price)}</b>
-      </footer>
     </article>
   );
 };
