@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { Package } from "lucide-react";
 import { useCategories } from "../../hooks/useCategories";
 import { useGiftcards } from "../../hooks/useGiftcards";
+import { money } from "../../lib/money";
 import "./CategoryGrid.css";
 
 const API_ORIGIN = (import.meta.env.VITE_API_URL || "").replace(/\/apis\/?$/, "");
@@ -15,13 +16,6 @@ const resolveImage = (image?: string | null) => {
   if (/^https?:\/\//.test(image)) return image;
   return `${API_ORIGIN}/${image.replace(/^\/+/, "")}`;
 };
-
-const money = (n: number) =>
-  new Intl.NumberFormat("es-AR", {
-    style: "currency",
-    currency: "ARS",
-    maximumFractionDigits: 0,
-  }).format(n);
 
 // Cuántas imágenes se precargan de entrada (primera fila aprox.).
 const PRELOAD = 6;

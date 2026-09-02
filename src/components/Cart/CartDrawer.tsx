@@ -5,11 +5,10 @@ import { useCart } from "../../context/CartContext";
 import { useConfirm } from "../../context/ConfirmContext";
 import type { GiftcardCartItem } from "../../hooks/useCart";
 import CheckoutButton from "../CheckoutButton";
+import { money } from "../../lib/money";
 import "./CartDrawer.css";
 
 const API_ORIGIN = (import.meta.env.VITE_API_URL || "").replace(/\/apis\/?$/, "");
-const money = (n: number) =>
-  new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(n);
 const thumb = (image?: string) =>
   !image ? undefined : /^https?:\/\//.test(image) ? image : `${API_ORIGIN}/${image.replace(/^\/+/, "")}`;
 

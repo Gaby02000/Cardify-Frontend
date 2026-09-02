@@ -13,6 +13,7 @@ import {
 import { useCategories } from "../hooks/useCategories";
 import { useGiftcards } from "../hooks/useGiftcards";
 import { useCart } from "../context/CartContext";
+import { money } from "../lib/money";
 import type { GiftCard } from "../components/GiftCard/types";
 import "./CategoryPage.css";
 
@@ -23,14 +24,6 @@ const resolveImage = (image?: string) => {
   if (/^https?:\/\//.test(image)) return image;
   return `${API_ORIGIN}/${image.replace(/^\/+/, "")}`;
 };
-
-const money = (n: number | string) =>
-  new Intl.NumberFormat("es-AR", {
-    style: "currency",
-    currency: "ARS",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(Number(n));
 
 const priceOf = (g: GiftCard) => Number(g.final_price ?? g.price);
 const isOff = (g: GiftCard) =>

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Info, Plus, RotateCcw } from "lucide-react";
 import type { GiftCard } from "./types";
 import { useCart } from "../../context/CartContext";
+import { money } from "../../lib/money";
 import "./GiftCard.css";
 
 const API_ORIGIN = (import.meta.env.VITE_API_URL || "").replace(/\/apis\/?$/, "");
@@ -12,8 +13,6 @@ const resolveImage = (image?: string) => {
   return `${API_ORIGIN}/${image.replace(/^\/+/, "")}`;
 };
 
-const money = (n: number) =>
-  new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 }).format(n);
 
 interface Props {
   giftcard: GiftCard;

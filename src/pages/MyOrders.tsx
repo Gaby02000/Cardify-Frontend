@@ -18,6 +18,7 @@ import { useToast } from "../context/ToastContext";
 import { useMyOrders } from "../hooks/useMyOrders";
 import type { MyOrder } from "../hooks/useMyOrders";
 import api from "../lib/api";
+import { money } from "../lib/money";
 import "./MyOrders.css";
 
 const PER_PAGE = 10;
@@ -29,13 +30,6 @@ const resolveImage = (image?: string | null) => {
   if (/^https?:\/\//.test(image)) return image;
   return `${API_ORIGIN}/${image.replace(/^\/+/, "")}`;
 };
-
-const money = (n: number | string) =>
-  new Intl.NumberFormat("es-AR", {
-    style: "currency",
-    currency: "ARS",
-    maximumFractionDigits: 0,
-  }).format(Number(n));
 
 const fmtDate = (iso: string) =>
   new Date(iso).toLocaleDateString("es-AR", {
