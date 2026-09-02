@@ -61,18 +61,21 @@ const statusInfo = (status: string): { label: string; variant: Variant } => {
 const STATUS_OPTS = [
   { value: "", label: "Todos los estados" },
   { value: "pagado", label: "Pagado" },
-  { value: "pendiente", label: "Pendiente" },
-  { value: "rechazado", label: "Rechazado" },
   { value: "reembolsado", label: "Reembolsado" },
 ];
 
 // Agrupa las variantes históricas de estado bajo el valor canónico del filtro.
 const STATUS_GROUPS: Record<string, string[]> = {
   pagado: ["pagado", "completed", "shipped", "authorized"],
-  pendiente: ["pendiente", "pending", "processing", "in_process"],
-  rechazado: ["rechazado", "rejected", "cancelled"],
   reembolsado: ["reembolsado", "refunded", "charged_back"],
 };
+
+// "Mis compras" solo muestra compras concretadas (pagadas o devueltas). Las
+// pendientes o rechazadas no aparecen; este guard cubre además cachés viejas.
+const VISIBLE_STATUSES = new Set([
+  ...STATUS_GROUPS.pagado,
+  ...STATUS_GROUPS.reembolsado,
+]);
 
 const SORT_OPTS = [
   { value: "date-desc", label: "Más recientes" },
@@ -267,7 +270,8 @@ const MyOrders = () => {
   }, [status, dateFrom, dateTo, sortValue]);
 
   const filtered = useMemo(() => {
-    let list = allOrders;
+    // Solo compras concretadas: descarta pendientes / rechazadas (y cachés viejas).
+    let list = allOrders.filter((o) => VISIBLE_STATUSES.has(o.status));
 
     if (status) {
       const group = STATUS_GROUPS[status] ?? [status];
