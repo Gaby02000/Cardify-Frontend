@@ -20,7 +20,7 @@ const resolveImage = (image?: string | null) => {
 // Cuántas imágenes se precargan de entrada (primera fila aprox.).
 const PRELOAD = 6;
 // Categorías visibles antes de tener que pulsar "Ver más categorías".
-const VISIBLE_LIMIT = 10;
+const VISIBLE_LIMIT = 8;
 
 interface CatCard {
   id: number;
