@@ -71,6 +71,28 @@
   color: var(--text-muted);
 }
 
+.catgrid__more {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: max-content;
+  margin: var(--s-5) auto 0;
+  padding: 0.7rem 1.4rem;
+  border-radius: var(--r-full);
+  border: 1px solid var(--border-strong);
+  background: var(--bg-2);
+  color: var(--text);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--fs-sm);
+  transition: border-color var(--tr), background var(--tr), color var(--tr);
+}
+.catgrid__more:hover {
+  border-color: var(--lime);
+  background: var(--lime-dim);
+  color: var(--lime);
+}
+
 @media (min-width: 640px) {
   .catgrid {
     grid-template-columns: repeat(3, 1fr);

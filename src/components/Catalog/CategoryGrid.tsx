@@ -1,9 +1,9 @@
 // src/components/Catalog/CategoryGrid.tsx
 // Vista por categoría: una tarjeta grande por categoría, con la imagen de
 // una de sus gift cards ya precargada (loading eager + <link rel=preload>).
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Package } from "lucide-react";
+import { Package, ChevronDown, ChevronUp } from "lucide-react";
 import { useCategories } from "../../hooks/useCategories";
 import { useGiftcards } from "../../hooks/useGiftcards";
 import { money } from "../../lib/money";
@@ -19,6 +19,8 @@ const resolveImage = (image?: string | null) => {
 
 // Cuántas imágenes se precargan de entrada (primera fila aprox.).
 const PRELOAD = 6;
+// Categorías visibles antes de tener que pulsar "Ver más categorías".
+const VISIBLE_LIMIT = 10;
 
 interface CatCard {
   id: number;
@@ -31,6 +33,7 @@ interface CatCard {
 const CategoryGrid = () => {
   const { categories, loading: catsLoading } = useCategories();
   const { giftcards, loading: gcLoading, error } = useGiftcards();
+  const [showAll, setShowAll] = useState(false);
 
   const cards = useMemo<CatCard[]>(
     () =>
@@ -100,39 +103,64 @@ const CategoryGrid = () => {
     );
   }
 
+  const hasMore = cards.length > VISIBLE_LIMIT;
+  const visible = showAll ? cards : cards.slice(0, VISIBLE_LIMIT);
+
   return (
-    <div className="catgrid">
-      {cards.map((c, i) => (
-        <Link key={c.id} to={`/categoria/${c.id}`} className="catcard">
-          <div className="catcard__media">
-            {c.image ? (
-              <img
-                src={c.image}
-                alt={c.name}
-                width={480}
-                height={300}
-                loading={i < PRELOAD ? "eager" : "lazy"}
-                fetchPriority={i < PRELOAD ? "high" : "auto"}
-                decoding="async"
-              />
-            ) : (
-              <span className="catcard__ph">
-                <Package size={30} strokeWidth={1.2} />
-              </span>
-            )}
-          </div>
-          <div className="catcard__body">
-            <h3 className="catcard__name">{c.name}</h3>
-            <p className="catcard__meta">
-              {gcLoading && c.count === 0
-                ? "Cargando…"
-                : `${c.count} ${c.count === 1 ? "tarjeta" : "tarjetas"}` +
-                  (c.from != null ? ` · desde ${money(c.from)}` : "")}
-            </p>
-          </div>
-        </Link>
-      ))}
-    </div>
+    <>
+      <div className="catgrid">
+        {visible.map((c, i) => (
+          <Link key={c.id} to={`/categoria/${c.id}`} className="catcard">
+            <div className="catcard__media">
+              {c.image ? (
+                <img
+                  src={c.image}
+                  alt={c.name}
+                  width={480}
+                  height={300}
+                  loading={i < PRELOAD ? "eager" : "lazy"}
+                  fetchPriority={i < PRELOAD ? "high" : "auto"}
+                  decoding="async"
+                />
+              ) : (
+                <span className="catcard__ph">
+                  <Package size={30} strokeWidth={1.2} />
+                </span>
+              )}
+            </div>
+            <div className="catcard__body">
+              <h3 className="catcard__name">{c.name}</h3>
+              <p className="catcard__meta">
+                {gcLoading && c.count === 0
+                  ? "Cargando…"
+                  : `${c.count} ${c.count === 1 ? "tarjeta" : "tarjetas"}` +
+                    (c.from != null ? ` · desde ${money(c.from)}` : "")}
+              </p>
+            </div>
+          </Link>
+        ))}
+      </div>
+
+      {hasMore && (
+        <button
+          type="button"
+          className="catgrid__more"
+          onClick={() => setShowAll((v) => !v)}
+          aria-expanded={showAll}
+        >
+          {showAll ? (
+            <>
+              Ver menos categorías <ChevronUp size={16} />
+            </>
+          ) : (
+            <>
+              Ver más categorías ({cards.length - VISIBLE_LIMIT}){" "}
+              <ChevronDown size={16} />
+            </>
+          )}
+        </button>
+      )}
+    </>
   );
 };
 
