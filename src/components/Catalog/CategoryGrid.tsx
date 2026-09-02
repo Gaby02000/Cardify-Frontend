@@ -6,7 +6,6 @@ import { Link } from "react-router-dom";
 import { Package, ChevronDown, ChevronUp } from "lucide-react";
 import { useCategories } from "../../hooks/useCategories";
 import { useGiftcards } from "../../hooks/useGiftcards";
-import { money } from "../../lib/money";
 import "./CategoryGrid.css";
 
 const API_ORIGIN = (import.meta.env.VITE_API_URL || "").replace(/\/apis\/?$/, "");
@@ -26,13 +25,11 @@ interface CatCard {
   id: number;
   name: string;
   image: string | null;
-  count: number;
-  from: number | null;
 }
 
 const CategoryGrid = () => {
   const { categories, loading: catsLoading } = useCategories();
-  const { giftcards, loading: gcLoading, error } = useGiftcards();
+  const { giftcards, error } = useGiftcards();
   const [showAll, setShowAll] = useState(false);
 
   const cards = useMemo<CatCard[]>(
@@ -46,16 +43,11 @@ const CategoryGrid = () => {
         const hero =
           byNewest.find((g) => g.stock > 0 && g.image) ??
           byNewest.find((g) => g.image);
-        const prices = items
-          .map((g) => Number(g.final_price ?? g.price))
-          .filter((n) => n > 0);
 
         return {
           id: c.id,
           name: c.name,
           image: resolveImage(c.icon) ?? resolveImage(hero?.image) ?? null,
-          count: items.length,
-          from: prices.length ? Math.min(...prices) : null,
         };
       }),
     [categories, giftcards]
@@ -130,12 +122,6 @@ const CategoryGrid = () => {
             </div>
             <div className="catcard__body">
               <h3 className="catcard__name">{c.name}</h3>
-              <p className="catcard__meta">
-                {gcLoading && c.count === 0
-                  ? "Cargando…"
-                  : `${c.count} ${c.count === 1 ? "tarjeta" : "tarjetas"}` +
-                    (c.from != null ? ` · desde ${money(c.from)}` : "")}
-              </p>
             </div>
           </Link>
         ))}

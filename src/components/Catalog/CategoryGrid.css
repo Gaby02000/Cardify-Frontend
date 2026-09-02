@@ -49,17 +49,10 @@
 }
 
 .catcard__body {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
   padding: var(--s-4);
 }
 .catcard__name {
   font-size: var(--fs-h3);
-}
-.catcard__meta {
-  font-size: var(--fs-sm);
-  color: var(--text-muted);
 }
 
 .catgrid__sk {
