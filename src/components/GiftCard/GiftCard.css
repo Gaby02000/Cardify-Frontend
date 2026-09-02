@@ -360,10 +360,6 @@
   color: var(--text-dim);
   text-decoration: line-through;
 }
-.gc__balance {
-  font-size: var(--fs-xs);
-  color: var(--text-dim);
-}
 .gc__stock {
   font-size: var(--fs-xs);
   color: var(--text-dim);

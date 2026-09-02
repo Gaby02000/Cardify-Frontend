@@ -68,18 +68,13 @@ const GiftcardItem: React.FC<Props> = ({ giftcard }) => {
                 {money(finalPrice)}
                 {hasDiscount && <s className="gc__price-old">{money(listPrice)}</s>}
               </span>
-              {giftcard.amount && (
-                <span className="gc__balance">Saldo {money(Number(giftcard.amount))}</span>
-              )}
             </div>
 
-            <span className={`gc__stock ${lowStock ? "is-low" : ""}`}>
-              {outOfStock
-                ? "Sin stock"
-                : lowStock
-                ? `¡Quedan ${giftcard.stock}!`
-                : "En stock"}
-            </span>
+            {(outOfStock || lowStock) && (
+              <span className={`gc__stock ${lowStock ? "is-low" : ""}`}>
+                {outOfStock ? "Sin stock" : `¡Quedan ${giftcard.stock}!`}
+              </span>
+            )}
 
             <button
               className="btn btn-primary btn-block"
