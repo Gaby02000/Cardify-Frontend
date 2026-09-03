@@ -1,54 +1,73 @@
-# React + TypeScript + Vite
+# Cardify — Tienda (PWA)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Cardify** es una empresa ficticia dedicada a la venta de gift cards digitales.
+Este repositorio contiene la **tienda para clientes**: una aplicación web donde
+el usuario explora el catálogo, arma el carrito, paga y recibe sus códigos.
 
-Currently, two official plugins are available:
+> El backend (API + panel administrativo) vive en un repositorio aparte:
+> **Cardify**.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 💼 Empresa ficticia
 
-## Expanding the ESLint configuration
+| | |
+|---|---|
+| **Nombre** | Cardify |
+| **Descripción** | Plataforma de e-commerce para compra y gestión de gift cards digitales. |
+| **Industria** | Tecnología / Comercio electrónico |
+| **Ubicación** | Argentina |
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 👥 Integrantes de la comisión
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+- **Alejo Maximiliano Gonzalez**
+- **Gabriel Federico Jose Gimenez Miguel**
+
+## 🧱 Tecnologías
+
+- **React + TypeScript** con **Vite**
+- **PWA**: se puede instalar como app y funciona sin conexión para navegar el catálogo
+- Notificaciones push para avisos de compra, descuentos y promociones
+
+## 🔌 Conexiones
+
+- Se conecta con la **API de Cardify** (el repositorio backend) para el catálogo,
+  el carrito, las cuentas y las compras.
+- El pago se realiza a través de **Mercado Pago**.
+
+## 🚀 Puesta en marcha (desarrollo)
+
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+La app queda en `http://localhost:5173`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Necesita un archivo `.env` con la URL de la API y las claves públicas de Mercado
+Pago y de las notificaciones push (ver `.env` de ejemplo). El backend de Cardify
+tiene que estar corriendo y accesible.
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+## 📜 Scripts
+
+| Script | Qué hace |
+|---|---|
+| `npm run dev` | Servidor de desarrollo |
+| `npm run build` | Build de producción a `dist/` |
+| `npm run preview` | Sirve el build de producción localmente |
+| `npm run lint` | Revisa el código con ESLint |
+
+## 📁 Estructura
+
 ```
+src/
+  pages/          Vistas de cada ruta (Home, categoría, mis compras, login…)
+  components/     Componentes por sección (catálogo, gift card, carrito, navbar…)
+  context/        Estado global (usuario, carrito, avisos)
+  hooks/          Carga de datos y cache local
+  lib/            Cliente de la API, pagos y notificaciones
+public/           Iconos y service worker
+```
+
+## ☁️ Despliegue
+
+- Hosting en **Vercel**.
+- Requiere HTTPS para que funcionen la instalación como app y las notificaciones.
