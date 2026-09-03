@@ -13,9 +13,6 @@ const Home = () => {
     <>
       {/* ---------- Hero ---------- */}
       <section id="inicio" className="hero">
-        <div className="hero__blob hero__blob--lime" />
-        <div className="hero__blob hero__blob--violet" />
-
         <div className="container">
         <div className="hero__inner fade-up">
           <span className="eyebrow">

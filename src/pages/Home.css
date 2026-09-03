@@ -1,48 +1,16 @@
 /* ---------- Hero ---------- */
+/* El fondo (resplandor violeta/lima) lo pone body en index.css y es continuo
+   para toda la página: el hero y el catálogo comparten la misma superficie,
+   sin velos ni blobs por sección. */
 .hero {
   position: relative;
   width: 100%;
-  overflow: hidden;
   padding-block: var(--s-8) var(--s-9);
   scroll-margin-top: var(--nav-h);
-  isolation: isolate;
-}
-/* Vela suave para que el bloque no "corte" contra la sección siguiente */
-.hero::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background: linear-gradient(180deg, transparent 60%, var(--bg));
-}
-.hero__blob {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(90px);
-  z-index: 0;
-  pointer-events: none;
-  animation: float 9s ease-in-out infinite;
-}
-.hero__blob--lime {
-  width: clamp(18rem, 40vw, 30rem);
-  aspect-ratio: 1;
-  top: -8rem;
-  right: -6rem;
-  background: rgba(163, 255, 18, 0.13);
-}
-.hero__blob--violet {
-  width: clamp(20rem, 46vw, 34rem);
-  aspect-ratio: 1;
-  bottom: -14rem;
-  left: -8rem;
-  background: rgba(139, 92, 246, 0.2);
-  animation-delay: -4s;
 }
 
 .hero__inner {
   position: relative;
-  z-index: 1;
   max-width: 44rem;
 }
 .hero h1 {

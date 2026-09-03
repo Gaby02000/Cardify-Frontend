@@ -23,10 +23,15 @@ body {
   line-height: 1.6;
   color: var(--text);
   background-color: var(--bg);
+  /* Un único resplandor continuo en la parte superior de la página (violeta a la
+     izquierda, lima a la derecha) que se desvanece hacia el fondo plano. Sin
+     blur, sin animación y sin background-attachment: fixed: no hay corte entre
+     el hero y el catálogo, y no cuesta repintado al hacer scroll. */
   background-image:
-    radial-gradient(60rem 60rem at 12% -10%, rgba(139, 92, 246, 0.18), transparent 60%),
-    radial-gradient(48rem 48rem at 105% 8%, rgba(163, 255, 18, 0.12), transparent 55%);
-  background-attachment: fixed;
+    radial-gradient(46rem 40rem at 4% 1rem, rgba(139, 92, 246, 0.2), transparent 60%),
+    radial-gradient(40rem 32rem at 100% -2rem, rgba(163, 255, 18, 0.11), transparent 58%),
+    radial-gradient(40rem 42rem at -4% 32rem, rgba(139, 92, 246, 0.1), transparent 62%);
+  background-repeat: no-repeat;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
